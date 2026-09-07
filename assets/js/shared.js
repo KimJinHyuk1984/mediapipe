@@ -5,6 +5,14 @@
 (function () {
   "use strict";
   const site = window.SITE || {};
+  // 페이지가 선언한 data/site.js의 상대 주소를 기준으로 공통 이미지 주소를 계산합니다.
+  const dataScript = document.querySelector('script[src$="data/site.js"]');
+  const siteRoot = new URL("../", dataScript ? dataScript.src : document.baseURI);
+  function assetURL(path) { return new URL(path, siteRoot).href; }
+  function currentLevel() {
+    const slug = document.body.dataset.level;
+    return slug && (site.levels || []).find(function (level) { return level.slug === slug; });
+  }
   const root = document.documentElement;
   const themeKey = "lecture-template-theme";
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
@@ -30,7 +38,8 @@
   }
 
   function applyLectureMeta() {
-    const lecture = site.lecture || {};
+    const lecture = currentLevel();
+    if (!lecture) return;
     const title = lecture.title || "강의 제목";
     document.title = title;
     fill("[data-lecture-title]", title);
@@ -45,7 +54,7 @@
     const badges = document.querySelector("[data-lecture-badges]");
     if (!badges) return;
     badges.replaceChildren();
-    [["소요 시간", lecture.duration], ["대상", lecture.level]].forEach(function ([label, value]) {
+    [["레벨", lecture.badge], ["난이도", lecture.difficulty], ["소요 시간", lecture.duration], ["대상", lecture.target]].forEach(function ([label, value]) {
       if (!value) return;
       const badge = element("span", "badge", value);
       badge.setAttribute("aria-label", label + ": " + value);
@@ -53,6 +62,56 @@
     });
     (Array.isArray(lecture.tags) ? lecture.tags : []).forEach(function (tag) {
       badges.append(element("span", "badge badge-tag", tag));
+    });
+  }
+
+  function renderLevelCards() {
+    const container = document.querySelector("[data-level-cards]");
+    if (!container || document.body.dataset.level) return;
+    const meta = site.site || {};
+    document.title = meta.title || "";
+    fill("[data-site-title]", meta.title);
+    fill("[data-site-subtitle]", meta.subtitle);
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.content = meta.subtitle || "";
+    container.replaceChildren();
+    (site.levels || []).forEach(function (level, index) {
+      const item = element("li", "level-path-step");
+      const number = element("span", "path-number", String(index + 1).padStart(2, "0"));
+      number.setAttribute("aria-hidden", "true");
+      const ready = level.status === "ready";
+      const card = element(ready ? "a" : "article", "level-card");
+      card.dataset.status = level.status;
+      card.dataset.accent = level.accent;
+      if (ready) card.setAttribute("href", "./" + encodeURIComponent(level.slug) + "/");
+      else card.setAttribute("aria-disabled", "true");
+      const content = element("div", "level-card-content");
+      const top = element("div", "level-card-top");
+      top.append(element("span", "kicker", [level.emoji, level.badge].filter(Boolean).join(" ")));
+      if (!ready) top.append(element("span", "badge", "준비 중"));
+      content.append(top, element("h3", "", level.title), element("p", "level-subtitle", level.subtitle));
+      const details = element("div", "level-details");
+      [level.difficulty, level.duration].filter(Boolean).forEach(function (value) {
+        details.append(element("span", "badge", value));
+      });
+      const tags = element("div", "level-tags");
+      (level.tags || []).forEach(function (tag) { tags.append(element("span", "badge badge-tag", tag)); });
+      content.append(details, tags);
+      if (ready) content.append(element("span", "level-cta", "강의 시작하기 →"));
+      card.append(content);
+      if (level.cover) {
+        const cover = element("img", "level-cover");
+        cover.src = assetURL(level.cover);
+        cover.alt = level.slug === "level1"
+          ? "교실에서 스쿼트하는 학생과 AI 판정 화면을 보여주는 일러스트" : level.title + " 강의 표지";
+        cover.width = 1400;
+        cover.height = 763;
+        cover.loading = "lazy";
+        card.append(cover);
+        card.classList.add("has-cover");
+      }
+      item.append(number, card);
+      container.append(item);
     });
   }
 
@@ -77,7 +136,7 @@
           avatar.removeAttribute("aria-label");
         }, { once: true });
         image.addEventListener("error", function () { image.remove(); }, { once: true });
-        image.src = photoPath;
+        image.src = assetURL(photoPath);
         avatar.append(image);
       }
     }
@@ -248,7 +307,7 @@
 
   function initSectionProgress() {
     const sections = Array.from(document.querySelectorAll("main .lecture-section[id]"));
-    const slug = String((site.lecture || {}).slug || "lecture").trim() || "lecture";
+    const slug = currentLevel().slug;
     const key = "lecture-progress:" + slug;
     let visited = [];
     try {
@@ -548,14 +607,17 @@
 
   function init() {
     applyLectureMeta();
+    renderLevelCards();
     renderInstructorModal();
     renderOtherLectures();
     initThemeToggle();
     initCodeBlocks();
-    initNav();
-    initSectionProgress();
-    initPresentationMode();
-    initProgressBar();
+    if (currentLevel()) {
+      initNav();
+      initSectionProgress();
+      initPresentationMode();
+      initProgressBar();
+    }
     initReveal();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });

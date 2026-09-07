@@ -1,5 +1,28 @@
 /* 강의별 커스텀 스타일은 이 파일에만 작성합니다.
  * 공통 토큰은 tokens.css에 있습니다. 여기서 공통 토큰을 재정의하지 않습니다.
  * 예: .lecture-demo { padding: var(--space-6); }
- * Phase 0: 실제 강의 스타일은 아직 없습니다.
+ * Phase 1-B-1: 도입부와 환경 설정.
  */
+.concept-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.process-flow { list-style: none; margin: 0; padding: 0; }
+.process-flow .kicker { margin: 0 0 var(--space-3); color: var(--accent-text); }
+.mission-finish { font-size: var(--font-card); }
+.math-steps { margin: 0; padding-left: var(--space-6); }
+.math-steps li + li { margin-top: var(--space-4); }
+.level2-preview { opacity: .58; cursor: default; }
+body[data-level="level1"] pre[data-complete="final"] { max-height: 70vh; overflow: auto; }
+body.is-presenting[data-level="level1"] pre[data-complete="final"] { max-height: min(42vh, 420px); }
+.table-scroll { max-width: 100%; overflow-x: auto; }
+.landmark-table { width: 100%; border-collapse: collapse; }
+.landmark-table caption { text-align: left; margin-bottom: var(--space-3); font-weight: var(--weight-heading); }
+.landmark-table th, .landmark-table td { padding: var(--space-3); border: 1px solid var(--border); text-align: left; }
+.landmark-table thead { background: var(--surface); }
+.landmark-figure { max-width: 640px; margin-inline: auto; }
+.setup-versions { margin-block: var(--space-4); padding-left: var(--space-5); }
+.setup-versions li + li { margin-top: var(--space-3); }
+.setup-versions li strong { display: inline; }
+body[data-level="level1"] .example-stack > * { min-width: 0; }
+body[data-level="level1"] .copy-button { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 767px) {
+  .concept-grid { grid-template-columns: 1fr; }
+}

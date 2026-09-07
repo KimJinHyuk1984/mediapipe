@@ -1,0 +1,12 @@
+
+source/
+ver1/
+ver2/
+ver1.zip
+ver2.zip
+venv/
+__pycache__/
+*.pyc
+
+files.zip
+codex.txt

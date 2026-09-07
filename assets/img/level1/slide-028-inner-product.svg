@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1376" height="768" viewBox="0 0 1376 768" role="img" aria-label="실제 계산 과정과 판정 로직">
+<rect width="1376" height="768" fill="#f4faf7"/>
+<style>text{font-family:'Malgun Gothic',sans-serif;fill:#152b24} .title{font-size:42px;font-weight:700}.sub{font-size:25px;fill:#365d4e}.head{font-size:29px;font-weight:700}.body{font-size:25px}.math{font-family:Consolas,'Malgun Gothic',monospace;font-size:28px}.note{font-size:23px;fill:#365d4e}</style>
+<text x="64" y="80" class="title">실제 계산 과정과 판정 로직</text><text x="64" y="127" class="sub">벡터 내적 → 코사인값 → 역코사인 → 도 단위 각도</text>
+<rect x="48" y="164" width="1280" height="133" rx="18" fill="#d9f1e6"/>
+<text x="80" y="216" class="math">cos θ = (BA · BC) / (|BA| × |BC|)</text>
+<text x="80" y="267" class="math">θ = arccos(cos θ) → np.degrees로 도 단위 변환</text>
+<text x="64" y="354" class="head">90° 예시를 직접 계산해 보기</text>
+<text x="64" y="407" class="body">A=(0,1), B=(0,0), C=(1,0)</text>
+<text x="64" y="451" class="body">BA=(0,1), BC=(1,0)</text>
+<text x="64" y="495" class="body">내적 = 0×1 + 1×0 = 0</text>
+<text x="64" y="539" class="body">벡터 길이 = 각각 1 → cos θ = 0</text>
+<text x="64" y="583" class="head">arccos(0) = π/2 라디안 = 90°</text>
+<text x="760" y="354" class="head">각도에 이름 붙이기</text>
+<text x="760" y="408" class="body">θ &gt; 160° : STAND UP</text>
+<text x="760" y="460" class="body">100° &lt; θ ≤ 160° : MORE DEEP</text>
+<text x="760" y="512" class="body">70° &lt; θ ≤ 100° : GOOD SQUAT</text>
+<text x="760" y="564" class="body">θ ≤ 70° : TOO DEEP</text>
+<rect x="48" y="634" width="1280" height="89" rx="16" fill="white" stroke="#b9cfc4"/>
+<text x="76" y="672" class="head">np.clip(cos θ, −1, 1)</text>
+<text x="76" y="707" class="note">계산 오차로 정의역을 벗어나지 않도록, 코사인값을 −1~1로 제한합니다.</text></svg>

@@ -1,0 +1,21 @@
+# ============================================================
+# AI 스쿼트 왕 특강 - 의존 라이브러리
+# ============================================================
+# 권장 Python: 3.10 ~ 3.11  (3.12 이상은 mediapipe 호환성 주의)
+#
+# 설치 방법:
+#   pip install -r requirements_new.txt
+#
+# (선택) 가상환경 사용 권장:
+#   python3 -m venv venv
+#   source venv/bin/activate        # macOS / Linux
+#   venv\Scripts\activate           # Windows
+#   pip install -r requirements_new.txt
+# ============================================================
+
+# --- 핵심 라이브러리 (학생 실습용) ---
+opencv-python==4.10.0.84      # 웹캠 영상 처리
+mediapipe==0.10.21            # AI 자세 인식 (33개 관절)
+numpy==1.26.4                 # 수학 계산 (mediapipe와 호환되는 1.x 고정)
+pillow==10.4.0               # 한글 출력 (PIL)
+

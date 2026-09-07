@@ -3,7 +3,7 @@
  * window.WIDGETS["my-demo"] = function (element, site) {
  *   const button = document.createElement("button");
  *   button.type = "button";
- *   button.textContent = site.lecture.title;
+ *   button.textContent = site.levels.find(level => level.slug === document.body.dataset.level).title;
  *   button.addEventListener("click", function () { button.textContent = "실행됨"; });
  *   element.append(button);
  * };

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1376" height="768" viewBox="0 0 1376 768" role="img" aria-label="각도의 기초 — 세 점과 두 벡터">
+<rect width="1376" height="768" fill="#f4faf7"/>
+<style>text{font-family:'Malgun Gothic',sans-serif;fill:#152b24} .title{font-size:42px;font-weight:700}.sub{font-size:25px;fill:#365d4e}.head{font-size:29px;font-weight:700}.body{font-size:25px}.math{font-family:Consolas,'Malgun Gothic',monospace;font-size:28px}.note{font-size:23px;fill:#365d4e}</style>
+<text x="64" y="80" class="title">각도의 기초 — 세 점과 두 벡터</text><text x="64" y="127" class="sub">엉덩이 A · 무릎 B · 발목 C → 꼭짓점 B에서 각도 θ 측정</text>
+<rect x="48" y="166" width="600" height="492" rx="20" fill="white" stroke="#b9cfc4"/>
+<path d="M330 465 L155 245 M330 465 L535 530" fill="none" stroke="#006b53" stroke-width="12" stroke-linecap="round"/>
+<circle cx="155" cy="245" r="17" fill="#5b21b6"/><circle cx="330" cy="465" r="17" fill="#006b53"/><circle cx="535" cy="530" r="17" fill="#855300"/>
+<path d="M280 402 Q363 360 410 490" fill="none" stroke="#855300" stroke-width="5"/>
+<text x="84" y="215" class="head">A · 엉덩이 23</text><text x="88" y="525" class="head">B · 무릎 25</text>
+<text x="407" y="587" class="head">C · 발목 27</text><text x="370" y="426" class="head">θ</text>
+<text x="216" y="345" class="body">BA</text><text x="429" y="482" class="body">BC</text>
+<text x="705" y="215" class="head">1. B를 기준점으로 옮기기</text>
+<text x="705" y="271" class="math">BA = A − B</text><text x="705" y="315" class="note">무릎에서 엉덩이로 향하는 벡터</text>
+<text x="705" y="378" class="math">BC = C − B</text><text x="705" y="422" class="note">무릎에서 발목으로 향하는 벡터</text>
+<text x="705" y="504" class="head">2. 두 벡터 사이의 각도</text>
+<text x="705" y="560" class="body">서 있을 때 약 170°</text><text x="705" y="605" class="body">앉았을 때 약 90°</text>
+<text x="64" y="716" class="head">교과서의 벡터 내적 공식으로, 내 무릎의 각도를 잽니다.</text></svg>

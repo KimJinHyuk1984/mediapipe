@@ -1,14 +1,19 @@
 /* ★ 공통 관리 파일: instructor는 템플릿 원본에서만 수정해 모든 강의에 반영합니다.
- * lecture와 otherLectures는 각 강의 저장소에서 수정합니다.
+ * site, levels와 otherLectures는 각 강의 저장소에서 수정합니다.
  * 동기화 스크립트는 이 파일을 덮어쓰지 않습니다. instructor 변경은 수동으로 병합합니다.
  */
 window.SITE = {
+  site: {
+    title: "AI 운동 코치 만들기",
+    subtitle: "파이썬 + MediaPipe로 배우는 실시간 자세 인식",
+    repo: "mediapipe"
+  },
   // ── 이 아래 instructor 블록은 모든 강의 저장소에서 동일하게 유지한다 ──
   instructor: {
     name: "김진혁",
     affiliation: "동양고등학교 · 수학, 정보",
     email: "kimjh0630@naver.com",
-    photo: "assets/img/instructor.jpg",
+    photo: "assets/img/instructor.webp",
     credentials: [
       "동양고등학교 교사(수학, 정보)",
       "성균관대학교 일반대학원 수학교육전공 박사 수료",
@@ -24,17 +29,38 @@ window.SITE = {
   },
 
   // ── 이 아래는 강의마다 교체한다 ──
-  lecture: {
-    slug: "lecture-title",
-    title: "강의 제목",
-    subtitle: "한 줄 부제",
-    kicker: "TOPIC",
-    duration: "2시간",
-    level: "고등학교",
-    tags: ["Python"],
-    accent: "neon-green", // neon-green | violet | amber
-    emoji: ""
-  },
+  levels: [
+    {
+      slug: "level1",
+      badge: "LEVEL 1",
+      title: "AI 스쿼트 왕",
+      subtitle: "웹캠으로 스쿼트를 자동으로 세는 AI 만들기",
+      kicker: "PYTHON + MEDIAPIPE",
+      duration: "2시간",
+      target: "고등학교",
+      difficulty: "입문",
+      tags: ["OpenCV", "MediaPipe", "각도 계산", "상태머신"],
+      accent: "neon-green",
+      emoji: "",
+      cover: "assets/img/level1/slide-003-a.webp",
+      status: "ready"
+    },
+    {
+      slug: "level2",
+      badge: "LEVEL 2",
+      title: "AI 운동왕 시즌 2",
+      subtitle: "푸쉬업·팔벌려뛰기·플랭크까지 하나의 레시피로",
+      kicker: "GENERALIZATION",
+      duration: "2시간",
+      target: "고등학교",
+      difficulty: "심화",
+      tags: ["함수 재사용", "위치 기반 측정", "데이터로 설계"],
+      accent: "violet",
+      emoji: "",
+      cover: "",
+      status: "coming"
+    }
+  ],
 
   // 다른 강의로 이동하는 링크 (전부 외부 절대 주소)
   otherLectures: [
