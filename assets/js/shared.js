@@ -350,70 +350,214 @@
     const sections = Array.from(document.querySelectorAll("main .lecture-section[id]"));
     const button = document.querySelector("[data-presentation-toggle]");
     if (!sections.length || !button) return;
+
+    // Equal nonempty data-slide values group existing elements without changing
+    // reading layout. Empty values each start a slide. A template can reference
+    // an existing pre by ID: data-slide-code + data-slide-lines (no duplicate code).
+    const slides = [];
+    sections.forEach(function (section, sectionIndex) {
+      const groups = new Map();
+      const markers = Array.from(section.querySelectorAll("[data-slide]"));
+      if (!markers.length) markers.push(section);
+      markers.forEach(function (marker) {
+        const key = marker.dataset.slide || Symbol();
+        let slide = groups.get(key);
+        if (!slide) {
+          slide = { section, sectionIndex, title: marker.dataset.slideTitle || "", markers: [] };
+          groups.set(key, slide);
+          slides.push(slide);
+        }
+        slide.markers.push(marker);
+      });
+    });
+    const stage = element("div", "presentation-stage");
+    stage.hidden = true;
+    stage.tabIndex = -1;
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", "발표 화면");
+    const title = element("h2", "presentation-title");
+    const viewport = element("div", "presentation-viewport");
+    viewport.tabIndex = 0;
+    viewport.setAttribute("aria-label", "발표 조각 내용");
+    const content = element("div", "presentation-content");
+    const overflowHint = element("p", "presentation-overflow-hint", "↓ 내용이 더 있습니다. 이 영역에서 스크롤하세요.");
+    overflowHint.hidden = true;
+    viewport.append(content);
+    stage.append(title, viewport, overflowHint);
     const hud = element("div", "presentation-hud");
     hud.hidden = true;
     hud.setAttribute("role", "status");
     hud.setAttribute("aria-live", "polite");
     const counter = element("strong", "presentation-counter");
-    const hint = element("span", "", "← → 이동 · B 블랙아웃 · P 또는 Esc 종료");
-    hud.append(counter, hint);
+    hud.append(counter, element("span", "", "← → 조각 · Shift + 방향키 섹션 · B 블랙아웃 · P / Esc 종료"));
     const blackout = element("div", "presentation-blackout");
     blackout.hidden = true;
     blackout.setAttribute("aria-hidden", "true");
-    document.body.append(hud, blackout);
+    document.body.append(stage, hud, blackout);
     let index = 0;
     let returnFocus = null;
-
+    let moved = [];
+    let annotations = [];
+    let fitting = false;
+    let auditing = false;
+    let transition = null;
+    const overflow = new Map();
+    const warned = new Set();
+    const presenting = function () { return !stage.hidden; };
     function dialogOpen() {
       return Array.from(document.querySelectorAll("dialog")).some(function (dialog) { return dialog.open; });
     }
-    function show(nextIndex) {
-      index = Math.max(0, Math.min(sections.length - 1, nextIndex));
-      sections.forEach(function (section, sectionIndex) {
-        section.classList.toggle("is-presentation-section", sectionIndex === index);
+    function restore() {
+      if (transition) { transition.cancel(); transition = null; }
+      annotations.forEach(function (note) { note.remove(); });
+      annotations = [];
+      content.querySelectorAll(".is-slide-line-hidden").forEach(function (line) {
+        line.classList.remove("is-slide-line-hidden");
       });
-      const current = sections[index];
-      current.scrollTop = 0;
-      counter.textContent = (index + 1) + " / " + sections.length;
-      current.dispatchEvent(new CustomEvent("lecture:section-viewed"));
+      moved.reverse().forEach(function (entry) {
+        entry.placeholder.replaceWith(entry.node);
+      });
+      moved = [];
+    }
+    function move(node) {
+      if (content.contains(node)) return;
+      const placeholder = document.createComment("presentation: original position");
+      node.before(placeholder);
+      moved.push({ node, placeholder });
+      content.append(node);
+    }
+    function sliceCode(pre, range) {
+      const match = /^(\d+)-(\d+)$/.exec(range || "");
+      if (!match) return;
+      const lines = Array.from(pre.querySelectorAll(".code-line"));
+      // A trailing LF creates an empty display span, not another source line.
+      const total = lines.length - (lines.length > 1 && !lines[lines.length - 1].querySelector(".line-content").textContent ? 1 : 0);
+      const first = Math.max(1, Math.min(total, Number(match[1])));
+      const last = Math.max(first, Math.min(total, Number(match[2])));
+      lines.forEach(function (line, i) { line.classList.toggle("is-slide-line-hidden", i + 1 < first || i + 1 > last); });
+      const note = element("span", "presentation-code-range", first + "번 줄 ~ " + last + "번 줄 / 전체 " + total + "줄");
+      pre.closest(".code-block").querySelector(".code-toolbar").append(note);
+      annotations.push(note);
+    }
+    function fit() {
+      if (!presenting() || fitting) return;
+      fitting = true;
+      overflowHint.hidden = true;
+      viewport.classList.remove("has-overflow");
+      const sizes = [[28, 24], [27, 23], [26, 22], [25, 21], [24, 20], [23, 19], [22, 18], [21, 17], [20, 16], [19, 15], [18, 15], [17, 15]];
+      for (const size of sizes) {
+        stage.style.setProperty("--slide-body", size[0] + "px");
+        stage.style.setProperty("--slide-code", size[1] + "px");
+        if (content.scrollHeight <= viewport.clientHeight + 1) break;
+      }
+      const excess = content.scrollHeight - viewport.clientHeight;
+      if (excess > 1) {
+        const item = { slide: index + 1, section: slides[index].section.id, title: title.textContent, overflowPx: excess };
+        overflow.set(index, item);
+        overflowHint.hidden = false;
+        viewport.classList.add("has-overflow");
+        if (!auditing && !warned.has(index)) {
+          console.warn("[발표 조각 넘침] 더 작은 조각으로 나누세요.", item);
+          warned.add(index);
+        }
+      } else overflow.delete(index);
+      fitting = false;
+    }
+    function show(nextIndex, silent) {
+      restore();
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      const slide = slides[index];
+      const sectionTitle = slide.section.querySelector("h2").textContent.trim();
+      title.textContent = sectionTitle + (slide.title && slide.title !== sectionTitle ? " · " + slide.title : "");
+      slide.markers.forEach(function (marker) {
+        const source = marker.dataset.slideCode ? document.getElementById(marker.dataset.slideCode) : marker;
+        if (!source) return;
+        const node = source.matches("pre[data-code]") ? source.closest(".code-block") : source;
+        move(node);
+        if (source.matches("pre[data-code]")) sliceCode(source, marker.dataset.slideLines);
+        else source.querySelectorAll("pre[data-slide-lines]").forEach(function (pre) { sliceCode(pre, pre.dataset.slideLines); });
+      });
+      content.querySelectorAll("pre[data-code]").forEach(function (pre) {
+        const last = pre.querySelector(".code-line:last-child");
+        if (last && !last.querySelector(".line-content").textContent) last.classList.add("is-slide-line-hidden");
+      });
+      stage.dataset.slideIndex = String(index + 1);
+      stage.dataset.section = slide.section.id;
+      counter.textContent = (index + 1) + " / " + slides.length + " · 섹션 " + (slide.sectionIndex + 1) + "/" + sections.length;
+      viewport.scrollTop = 0;
+      fit();
+      if (!silent) {
+        slide.section.dispatchEvent(new CustomEvent("lecture:section-viewed"));
+        stage.focus({ preventScroll: true });
+        if (!reducedMotion.matches) transition = content.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120 });
+      }
     }
     function enter() {
       if (dialogOpen()) return;
       returnFocus = document.activeElement;
       const current = document.querySelector('[data-section-nav] a[aria-current="location"]');
-      const currentIndex = current ? sections.findIndex(function (section) { return section.id === current.dataset.sectionId; }) : -1;
+      const start = current ? slides.findIndex(function (slide) { return slide.section.id === current.dataset.sectionId; }) : 0;
+      // Do not reveal answers on entry. Later visits preserve the teacher's choice.
+      sections.forEach(function (section) { section.querySelectorAll("details").forEach(function (detail) { detail.open = false; }); });
       document.body.classList.add("is-presenting");
       button.setAttribute("aria-pressed", "true");
-      hud.hidden = false;
-      blackout.hidden = false;
-      show(currentIndex >= 0 ? currentIndex : 0);
+      stage.hidden = hud.hidden = blackout.hidden = false;
+      show(start >= 0 ? start : 0);
     }
     function exit() {
+      const section = slides[index].section;
+      restore();
+      stage.hidden = hud.hidden = blackout.hidden = true;
       document.body.classList.remove("is-presenting", "is-blackout");
+      blackout.setAttribute("aria-hidden", "true");
       button.setAttribute("aria-pressed", "false");
-      hud.hidden = true;
-      blackout.hidden = true;
-      sections.forEach(function (section) { section.classList.remove("is-presentation-section"); });
-      sections[index].scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" });
+      section.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" });
       if (returnFocus && returnFocus.isConnected) returnFocus.focus({ preventScroll: true });
     }
-    function toggle() {
-      if (document.body.classList.contains("is-presenting")) exit();
-      else enter();
-    }
+    // Scan every slide at the current viewport; no section progress is recorded.
+    // Call in DevTools while presenting: reportPresentationOverflow().
+    window.reportPresentationOverflow = function () {
+      if (!presenting()) { console.info("P로 발표 모드에 들어간 뒤 다시 실행하세요."); return []; }
+      const saved = index;
+      const focused = document.activeElement;
+      const scroll = viewport.scrollTop;
+      auditing = true;
+      overflow.clear();
+      slides.forEach(function (_, i) { show(i, true); });
+      const result = Array.from(overflow.values());
+      show(saved, true);
+      auditing = false;
+      viewport.scrollTop = scroll;
+      if (focused && focused.isConnected) focused.focus({ preventScroll: true });
+      console.table(result);
+      console.info("발표 조각 " + slides.length + "개 검사 · 넘침 " + result.length + "개");
+      return result;
+    };
     button.setAttribute("aria-pressed", "false");
-    button.addEventListener("click", toggle);
+    button.addEventListener("click", function () { if (presenting()) exit(); else enter(); });
+    window.addEventListener("resize", fit);
+    // Images, widget content and opening a details answer can change the height.
+    new ResizeObserver(function () { fit(); }).observe(content);
+    content.addEventListener("load", fit, true);
+    content.addEventListener("toggle", fit, true);
     document.addEventListener("keydown", function (event) {
       if (event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || dialogOpen()) return;
       const target = event.target;
       if (target instanceof Element && (target.matches("input, textarea, select") || target.isContentEditable)) return;
-      const presenting = document.body.classList.contains("is-presenting");
-      if (event.key.toLowerCase() === "p") { event.preventDefault(); toggle(); return; }
-      if (!presenting) return;
+      if (event.key.toLowerCase() === "p") { event.preventDefault(); if (presenting()) exit(); else enter(); return; }
+      if (!presenting()) return;
+      const backwards = ["ArrowLeft", "ArrowUp", "PageUp"].includes(event.key);
+      const forwards = ["ArrowRight", "ArrowDown", "PageDown"].includes(event.key);
+      if ((backwards || forwards) && target instanceof Element && target.closest("[data-widget]")) return;
       if (event.key === "Escape") { event.preventDefault(); exit(); }
-      else if (event.key === "ArrowLeft" || event.key === "PageUp") { event.preventDefault(); show(index - 1); }
-      else if (event.key === "ArrowRight" || event.key === "PageDown") { event.preventDefault(); show(index + 1); }
-      else if (event.key.toLowerCase() === "b") {
+      else if (backwards || forwards) {
+        event.preventDefault();
+        const direction = backwards ? -1 : 1;
+        if (event.shiftKey && event.key.startsWith("Arrow")) {
+          const targetSection = Math.max(0, Math.min(sections.length - 1, slides[index].sectionIndex + direction));
+          show(slides.findIndex(function (slide) { return slide.sectionIndex === targetSection; }));
+        } else show(index + direction);
+      } else if (event.key.toLowerCase() === "b") {
         event.preventDefault();
         const active = document.body.classList.toggle("is-blackout");
         blackout.setAttribute("aria-hidden", String(!active));
