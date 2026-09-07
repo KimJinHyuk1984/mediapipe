@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light dark">
+  <title></title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/lecture.css">
+  <!-- 일반 스크립트를 사용하므로 file://에서도 데이터를 읽을 수 있습니다. -->
+  <script src="../data/site.js" defer></script>
+  <script src="../assets/js/shared.js" defer></script>
+  <script src="../assets/js/widgets.js" defer></script>
+</head>
+<body data-level="level2" data-accent="violet">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div class="scroll-progress" aria-hidden="true"><div class="scroll-progress__fill" data-progress></div></div>
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <a class="back-to-hub" href="../">← 강의 목록</a>
+      <a class="brand" href="#top" aria-label="강의 처음으로">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v15M3 4h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v14h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3Z"/></svg>
+        </span>
+        <span class="brand-title" data-lecture-title></span>
+      </a>
+      <!-- shared.js가 본문의 .lecture-section을 수집해 링크를 생성합니다. -->
+      <nav class="section-nav" aria-label="강의 섹션" data-section-nav></nav>
+      <div class="header-actions">
+        <button class="button" type="button" data-presentation-toggle>발표 모드 <kbd>P</kbd></button>
+        <button class="button button-primary" type="button" data-open-instructor>선생님 소개 보기</button>
+        <button class="button button-icon" type="button" data-theme-toggle aria-label="테마 전환">
+          <svg data-theme-icon width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13a9 9 0 0 1-9.9-9.9A9 9 0 1 0 20.9 13Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <!-- 강의 메타는 전부 data/site.js에서 주입합니다. 이 영역은 그대로 재사용합니다. -->
+    <div class="container">
+      <section class="hero" id="top" aria-labelledby="lecture-title">
+        <p class="kicker" data-lecture-kicker></p>
+        <h1 id="lecture-title" data-lecture-title></h1>
+        <p class="hero-subtitle" data-lecture-subtitle></p>
+        <div class="hero-meta" data-lecture-badges aria-label="강의 정보"></div>
+        <div class="hero-byline">
+          <button class="text-button" type="button" data-open-instructor><span data-instructor-name></span> 선생님</button>
+          <span data-instructor-affiliation></span>
+        </div>
+      </section>
+
+      <section class="lecture-section" id="recap" aria-labelledby="recap-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">RECAP</p>
+          <h2 id="recap-title">지난 시간 복습</h2>
+        </div>
+        <div class="example-stack">
+          <div class="example-stack" data-slide="recap-1" data-slide-title="스쿼트 카운터를 다시 떠올리기">
+            <p>지난 시간에는 웹캠 영상을 읽고, MediaPipe로 관절 33개의 위치를 찾고, 무릎 각도를 계산해 스쿼트 횟수를 셌습니다. 영상이 곧바로 횟수가 되는 것이 아니라, <strong>웹캠 → 관절 인식 → 무릎 각도 → 카운트</strong>라는 과정을 거쳤습니다.</p>
+            <p>핵심 도구는 세 가지였습니다. <strong>MediaPipe 랜드마크</strong>는 몸의 위치를 알려 주고, <code>calculate_angle</code>은 세 좌표를 각도로 바꿉니다. <strong>상태머신</strong>은 앉았던 사실을 기억했다가 다시 일어날 때 한 번만 셉니다.</p>
+            <a class="button" href="../level1/">Level 1 · 스쿼트 카운터 복습하기</a>
+          </div>
+          <ol class="card-grid concept-grid process-flow" data-slide="recap-2" data-slide-title="반복해서 쓸 네 단계 레시피">
+            <li class="card"><h3>1. 관절 고르기</h3><p>움직임을 가장 잘 보여 주는 지점을 고릅니다. 스쿼트에서는 엉덩이·무릎·발목을 선택했습니다.</p></li>
+            <li class="card"><h3>2. 각도 재기</h3><p>세 좌표를 함수에 넣어 무릎이 얼마나 굽었는지 숫자로 바꿉니다.</p></li>
+            <li class="card"><h3>3. UP / DOWN 기준 정하기</h3><p>어느 범위가 앉은 자세이고 어느 범위가 선 자세인지 부등호로 정합니다.</p></li>
+            <li class="card"><h3>4. 카운트</h3><p>DOWN을 기억한 뒤 UP으로 바뀌는 순간에만 횟수를 더합니다.</p></li>
+          </ol>
+          <aside class="callout" data-slide="recap-3" data-slide-title="오늘도 같은 순서로"><div><strong>이 네 단계가 오늘 내내 반복됩니다</strong><p>관절을 고르고, 숫자로 측정하고, 기준을 정하고, 상태를 기억합니다. 다만 모든 운동을 각도로 재지는 않습니다. 팔벌려뛰기에서는 두 번째 단계를 위치·거리 측정으로 바꾸고, 플랭크에서는 횟수 대신 시간을 기록합니다.</p></div></aside>
+        </div>
+      </section>
+
+      <section class="lecture-section" id="mission" aria-labelledby="mission-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">MISSION</p>
+          <h2 id="mission-title">오늘의 미션</h2>
+        </div>
+        <div class="example-stack">
+          <div class="card-grid concept-grid" data-slide="mission-1" data-slide-title="운동 하나에서 여러 운동으로">
+            <article class="card"><h3>1. 푸쉬업 카운터 만들기</h3><p>관절만 바꾸면 익숙한 각도 함수를 다시 쓸 수 있습니다. 무릎 대신 팔꿈치를 재고, 푸쉬업에 맞는 기준값으로 굽혔다 펴는 동작을 셉니다.</p></article>
+            <article class="card"><h3>2. 팔벌려뛰기 카운터</h3><p>각도만으로는 팔을 올리고 다리를 벌린 자세를 구분하기 어렵습니다. 손목 높이와 발목 간격을 비교하는 방법을 찾아봅니다.</p></article>
+            <article class="card"><h3>3. 만능 코치</h3><p>카운트 부분은 공유하고 운동마다 판정 함수만 바꿉니다. 새 운동의 판정 함수를 준비한 뒤에는 운동 목록에 한 줄을 등록해 연결할 수 있게 만듭니다.</p></article>
+            <article class="card"><h3>4. 60초 도전</h3><p>완성한 프로그램에 제한 시간을 더해 AI 운동왕을 뽑습니다. 같은 종목과 같은 코드의 기준으로 기록을 비교합니다.</p></article>
+          </div>
+          <p class="mission-finish" data-slide="mission-2" data-slide-title="오늘의 도전"><strong>지난번엔 운동 하나, 오늘은 운동 전부.</strong></p>
+        </div>
+      </section>
+
+      <section class="lecture-section" id="bigpicture" aria-labelledby="bigpicture-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">BIG PICTURE</p>
+          <h2 id="bigpicture-title">레시피는 그대로다</h2>
+        </div>
+        <div class="example-stack">
+          <div class="example-stack" data-slide="bigpicture-1" data-slide-title="새 운동이라고 처음부터 만들까요?">
+            <p>스쿼트 프로그램을 푸쉬업 프로그램으로 바꾸려면 전부 다시 작성해야 할까요? 무릎 대신 팔꿈치를 본다고 생각해 보세요. 세 점으로 굽힘 정도를 구하고, 굽혔다 펴는 한 동작을 센다는 문제는 같습니다.</p>
+            <aside class="callout"><div><strong>바뀌는 것은 관절 번호와 기준값, 남는 것은 코드 구조</strong><p>각도를 구하는 함수는 몸의 부위 이름을 모릅니다. 세 좌표를 받으면 계산할 뿐입니다. 상태머신도 스쿼트인지 푸쉬업인지 몰라도 DOWN 다음에 UP이 왔는지를 기억할 수 있습니다.</p></div></aside>
+          </div>
+          <div class="table-scroll" role="region" aria-label="스쿼트와 푸쉬업 비교 표, 좁은 화면에서는 가로 스크롤" tabindex="0" data-slide="bigpicture-2" data-slide-title="달라지는 것과 같은 것">
+            <table class="landmark-table recipe-comparison">
+              <caption>오른쪽 관절 기준 · ‘변경’과 ‘동일’을 비교하세요</caption>
+              <thead><tr><th scope="col">항목</th><th scope="col">스쿼트</th><th scope="col">푸쉬업</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">관절 <span class="recipe-change">변경</span></th><td>엉덩이–무릎–발목</td><td>어깨–팔꿈치–손목</td></tr>
+                <tr><th scope="row">번호 <span class="recipe-change">변경</span></th><td>24, 26, 28</td><td>12, 14, 16</td></tr>
+                <tr class="recipe-same"><th scope="row">각도 함수 · 동일</th><td>calculate_angle</td><td>calculate_angle</td></tr>
+                <tr><th scope="row">DOWN 기준 <span class="recipe-change">변경</span></th><td>굽힘 · 70° &lt; θ ≤ 100°</td><td>굽힘 · θ &lt; 90°</td></tr>
+                <tr class="recipe-same"><th scope="row">UP 기준 · 동일</th><td>펴짐 · θ &gt; 160°</td><td>펴짐 · θ &gt; 160°</td></tr>
+                <tr class="recipe-same"><th scope="row">카운트 로직 · 동일</th><td>상태머신</td><td>상태머신</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="example-stack" data-slide="bigpicture-3" data-slide-title="좋은 설계의 출발점">
+            <h3>달라지는 것과 그대로인 것을 구분하기</h3>
+            <p>운동마다 프로그램 전체를 복사하면 카운트 오류를 고칠 때 모든 파일을 찾아다녀야 합니다. 반대로 공통 부분을 한곳에 두면 한 번 고친 로직을 여러 운동이 함께 쓸 수 있습니다. 프로그래밍에서 좋은 설계는 이렇게 <strong>달라지는 것과 그대로인 것을 구분하는 일</strong>에서 출발합니다.</p>
+            <p>오늘 세 번째 실습인 ‘만능 코치’에서는 운동별 판단을 함수로 분리하고, 이름과 판정 함수를 운동 목록에 등록합니다. 카운트 부분은 그대로 두고 판단 방법만 바꾸는 구조를 실제 코드로 만들어 보겠습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lecture-section" id="weapon" aria-labelledby="weapon-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">REUSE</p>
+          <h2 id="weapon-title">재사용 무기: 각도 함수</h2>
+        </div>
+        <div class="example-stack">
+          <div class="example-stack" data-slide="weapon-1" data-slide-title="교과서 공식을 다시 꺼내기">
+            <p><code>calculate_angle(a, b, c)</code>는 가운데 점 B를 꼭짓점으로 하는 각도를 도 단위로 반환합니다. BA = A − B, BC = C − B를 만든 뒤 벡터 내적 공식을 적용합니다. 이번에는 B가 무릎이 아니라 팔꿈치여도 계산 방법은 같습니다.</p>
+            <ol class="math-steps"><li><strong>cos θ = (BA · BC) / (|BA| × |BC|)</strong> — 내적을 두 벡터 길이의 곱으로 나눕니다.</li><li><strong>θ = arccos(cos θ)</strong> — 코사인값에서 각도를 되찾고, <code>np.degrees</code>로 라디안을 도로 바꿉니다.</li></ol>
+            <a class="button" href="../level1/#step3">Level 1 · 벡터 내적 설명 다시 읽기</a>
+          </div>
+          <p data-slide="weapon-2" data-slide-title="그대로 재사용하는 각도 함수">아래는 <code>practice1_pushup.py</code>의 27–40줄 그대로입니다. Level 1의 <code>03angle_01.py</code>와 계산식·계산 순서·반환 결과가 동일합니다. 주석은 짧게 정리했고, 마지막 결과를 <code>angle</code> 변수에 담는 대신 바로 반환합니다.</p>
+          <pre data-code data-language="python" data-label="practice1_pushup.py · 27–40줄" data-source="files/practice1_pushup.py" data-source-lines="27-40" data-slide="weapon-2"><code>def calculate_angle(a, b, c):
+    """b를 꼭짓점으로 하는 a-b-c 각도(도)를 반환"""
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    # Level 1과 같은 벡터 내적 + arccos
+    ba = a - b
+    bc = c - b
+    dot_product = np.dot(ba, bc)
+    magnitude_ba = np.linalg.norm(ba)
+    magnitude_bc = np.linalg.norm(bc)
+    cosine_angle = dot_product / (magnitude_ba * magnitude_bc)
+    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
+    return np.degrees(np.arccos(cosine_angle))</code></pre>
+          <div class="example-stack" data-slide="weapon-3" data-slide-title="한 번 잘 만든 함수는 계속 쓴다">
+            <aside class="callout"><div><strong>np.clip은 수치 오차를 막는 안전장치</strong><p>코사인값이 계산 오차로 −1~1을 조금 벗어나더라도 경계로 잘라 arccos에 전달합니다. 단, 점이 겹쳐 벡터 길이가 0이 되는 문제까지 해결하지는 않습니다.</p></div></aside>
+            <p>이 함수는 오늘 <code>practice1_pushup.py</code>, <code>practice3_multi_coach.py</code>, <code>practice4_workout_king.py</code>, <code>practice5_plank.py</code> 네 파일에서 그대로 쓰입니다. 팔벌려뛰기 전용인 <code>practice2_jumpingjack.py</code>는 각도 대신 위치와 거리를 비교하므로 사용하지 않습니다.</p>
+            <p><strong>한 번 잘 만든 함수는 계속 쓴다 — 이것이 재사용입니다.</strong> 함수 안의 수학은 그대로 두고, 다음 실습에서는 어떤 관절을 넣을지만 바꿔 보겠습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lecture-section" id="step1" aria-labelledby="step1-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">STEP 1 · 25MIN</p>
+          <h2 id="step1-title">푸쉬업 카운터</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="pushup-goal" data-slide-title="목표와 실행"><p class="section-description"><strong>목표: 팔꿈치 각도로 푸쉬업을 세는 것.</strong></p><p>지난 시간의 무릎 대신 팔꿈치를 보겠습니다. 각도 함수와 상태머신을 새로 만들 필요는 없습니다. 관절 세 개와 판정 기준만 바꾸면 익숙한 레시피가 다시 작동합니다.</p><p>Level 1에서 사용한 환경을 켜고 파일을 내려받아 <code>python practice1_pushup.py</code>로 실행하세요. 종료할 때는 영상 창을 선택하고 <code>q</code>를 누릅니다.</p><a class="button" href="files/practice1_pushup.py" download>practice1_pushup.py 전체 다운로드</a></div>
+<div class="example-stack" data-slide="pushup-joints" data-slide-title="무릎 대신 팔꿈치"><h3>먼저 관절을 고르는 세 줄만 바꿔 봅시다</h3><p>스쿼트에서는 엉덩이–무릎–발목, 푸쉬업에서는 어깨–팔꿈치–손목을 고릅니다. 아래 두 블록은 실습 파일에서 그대로 발췌했으므로 들여쓰기도 원본과 같습니다.</p></div>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 40–42줄" data-source="files/practice3_multi_coach.py" data-source-lines="40-42" data-slide="pushup-joints" data-slide-title="무릎 대신 팔꿈치"><code>    hip   = [lm[24].x, lm[24].y]
+    knee  = [lm[26].x, lm[26].y]
+    ankle = [lm[28].x, lm[28].y]</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 73–75줄" data-source="files/practice1_pushup.py" data-source-lines="73-75" data-slide="pushup-joints" data-slide-title="무릎 대신 팔꿈치"><code>        shoulder = [lm[12].x, lm[12].y]
+        elbow    = [lm[14].x, lm[14].y]
+        wrist    = [lm[16].x, lm[16].y]</code></pre>
+<div class="example-stack" data-slide="pushup-side" data-slide-title="오른팔을 고른 이유"><p><strong>12·14·16은 사람 기준 오른쪽 어깨·팔꿈치·손목</strong>입니다. 왼팔은 11·13·15입니다. 오른팔이 특별한 공식을 쓰는 것은 아닙니다. 이 예제는 한쪽 팔을 일관되게 추적하도록 오른팔을 선택했습니다. 카메라에 잘 보이는 쪽으로 세 번호를 함께 바꾸면 됩니다.</p><p>화면을 좌우 반전해도 랜드마크의 왼쪽·오른쪽 이름은 사람 몸을 기준으로 읽습니다.</p><a class="button" href="../level1/#landmarks">Level 1 · 33개 랜드마크 지도 다시 보기</a></div>
+<div class="example-stack" data-slide="pushup-read" data-slide-title="네 단계 주석을 따라 읽기"><h3>전체 코드를 기능별로 읽어 봅시다</h3><p>아래 블록은 파일 처음부터 끝까지 순서대로 나눈 것입니다. 블록 하나만 실행하는 것이 아니라 다운로드한 전체 파일을 실행하세요. <code>calculate_angle</code>은 바로 앞에서 본 함수이므로 짧게 확인하고 넘어갑니다.</p><p>반복문 주석의 <strong>(1) 관절 고르기 → (2) 각도 재기 → (3)(4) 판정＋카운트</strong>가 복습 카드의 네 단계와 정확히 대응합니다. 긴 프로그램처럼 보여도 우리가 정하는 핵심은 이 네 단계입니다.</p></div>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 1–23줄" data-source="files/practice1_pushup.py" data-source-lines="1-23" data-file-part="practice1_pushup.py" data-slide="pushup-code-1" data-slide-title="파일 안내와 라이브러리"><code>"""
+========================================================================
+practice1_pushup.py  -  푸쉬업 카운터 (팔꿈치 각도)
+========================================================================
+[지난 시간 복습]
+  스쿼트 카운터의 "레시피" 4단계
+    1) 관절 고르기   2) 각도 재기   3) UP / DOWN 기준 정하기   4) 카운트
+
+[오늘의 변화]
+  바뀌는 건 단 두 가지!
+    - 관절:  무릎(엉덩이-무릎-발목)  -&gt;  팔꿈치(어깨-팔꿈치-손목)
+    - 푸쉬업 기준:  펴짐 &gt; 160도 / 굽힘 &lt; 90도
+
+  ※ TIP: 푸쉬업은 옆에서(측면) 찍어야 팔이 잘 보입니다!
+
+실행:  python practice1_pushup.py    (종료: q)
+필요:  opencv-python==4.10.0.84 / mediapipe==0.10.21 / numpy==1.26.4
+========================================================================
+"""
+import cv2
+import numpy as np
+import mediapipe as mp
+</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 24–41줄" data-source="files/practice1_pushup.py" data-source-lines="24-41" data-file-part="practice1_pushup.py" data-slide="pushup-code-24" data-slide-title="재사용하는 각도 함수"><code># ----------------------------------------------------------------------
+# [재사용 무기 1] 세 점으로 각도를 구하는 함수  (지난 시간에 만든 그대로!)
+# ----------------------------------------------------------------------
+def calculate_angle(a, b, c):
+    """b를 꼭짓점으로 하는 a-b-c 각도(도)를 반환"""
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    # Level 1과 같은 벡터 내적 + arccos
+    ba = a - b
+    bc = c - b
+    dot_product = np.dot(ba, bc)
+    magnitude_ba = np.linalg.norm(ba)
+    magnitude_bc = np.linalg.norm(bc)
+    cosine_angle = dot_product / (magnitude_ba * magnitude_bc)
+    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
+    return np.degrees(np.arccos(cosine_angle))
+</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 42–56줄" data-source="files/practice1_pushup.py" data-source-lines="42-56" data-file-part="practice1_pushup.py" data-slide="pushup-code-42" data-slide-title="MediaPipe 준비와 상태 변수"><code># ----------------------------------------------------------------------
+# [재사용 무기 2] MediaPipe / 웹캠 준비  (지난 시간 그대로!)
+# ----------------------------------------------------------------------
+mp_pose = mp.solutions.pose
+mp_draw = mp.solutions.drawing_utils
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+cap = cv2.VideoCapture(0)  # 기본 카메라. 안 잡히면 1로 변경
+
+# ----------------------------------------------------------------------
+# [상태 변수]  스쿼트 때와 100% 동일한 구조
+# ----------------------------------------------------------------------
+count = 0
+stage = "UP"          # 시작은 팔 편 상태
+</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 57–71줄" data-source="files/practice1_pushup.py" data-source-lines="57-71" data-file-part="practice1_pushup.py" data-slide="pushup-code-57" data-slide-title="프레임 읽기와 관절 인식"><code>while True:
+    success, frame = cap.read()
+    if not success:
+        print("❌ 프레임 읽기 실패")
+        break
+
+    frame = cv2.flip(frame, 1)
+    h, w = frame.shape[:2]
+
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(rgb)
+
+    if results.pose_landmarks:
+        lm = results.pose_landmarks.landmark
+</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 72–87줄" data-source="files/practice1_pushup.py" data-source-lines="72-87" data-file-part="practice1_pushup.py" data-slide="pushup-code-72" data-slide-title="관절·각도·판정·카운트"><code>        # --- (1) 관절 고르기: 오른팔 어깨(12) - 팔꿈치(14) - 손목(16) ---
+        shoulder = [lm[12].x, lm[12].y]
+        elbow    = [lm[14].x, lm[14].y]
+        wrist    = [lm[16].x, lm[16].y]
+
+        # --- (2) 각도 재기: 팔꿈치 각도 ---
+        angle = calculate_angle(shoulder, elbow, wrist)
+
+        # --- (3)(4) UP/DOWN 판정 + 카운트 (스쿼트의 상태머신 구조 재사용! (각도 기준은 푸쉬업용)) ---
+        if angle &lt; 90:                       # 팔 굽힘 = 내려간 상태
+            stage = "DOWN"
+        if angle &gt; 160 and stage == "DOWN":  # 팔 다시 펴짐 = 올라온 순간!
+            stage = "UP"
+            count += 1
+            print(f"💪 푸쉬업 {count}회!")
+</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 88–101줄" data-source="files/practice1_pushup.py" data-source-lines="88-101" data-file-part="practice1_pushup.py" data-slide="pushup-code-88" data-slide-title="뼈대와 각도·횟수 표시"><code>        # --- 화면 표시 ---
+        mp_draw.draw_landmarks(frame, results.pose_landmarks,
+                               mp_pose.POSE_CONNECTIONS)
+        ex, ey = int(elbow[0] * w), int(elbow[1] * h)
+        cv2.putText(frame, f"{int(angle)}deg", (ex + 10, ey),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+
+    # 카운트 박스
+    cv2.rectangle(frame, (0, 0), (260, 90), (0, 0, 0), -1)
+    cv2.putText(frame, "PUSH-UP", (15, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    cv2.putText(frame, f"COUNT: {count}", (15, 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+</code></pre>
+<pre data-code data-language="python" data-label="practice1_pushup.py · 102–107줄" data-source="files/practice1_pushup.py" data-source-lines="102-107" data-file-part="practice1_pushup.py" data-slide="pushup-code-102" data-slide-title="화면 갱신과 종료"><code>    cv2.imshow("AI Push-up Counter", frame)
+    if cv2.waitKey(1) &amp; 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+<div class="example-stack" data-slide="pushup-explain" data-slide-title="아는 구조가 그대로 작동한다"><p><code>Pose</code>를 준비하고 <code>count = 0</code>, <code>stage = "UP"</code>으로 시작합니다. 팔을 편 자세가 출발점입니다. 반복문은 영상을 RGB로 바꾸어 처리하고, 관절이 잡힌 프레임에서만 좌표를 읽습니다.</p><p>팔꿈치가 90도 미만이면 DOWN을 기억하고, 그 뒤 160도를 넘으면 UP으로 바꾸며 한 번만 더합니다. 90~160도에서는 이전 상태를 유지합니다. 스쿼트와 상태머신 구조는 같지만 DOWN 기준은 다릅니다.</p><p>화면 표시에서는 비율 좌표에 <code>w</code>, <code>h</code>를 곱해 팔꿈치 옆에 각도 글자를 그립니다. 횟수 상자는 같은 <code>count</code>를 읽어 보여줄 뿐, 별도로 세지 않습니다.</p></div>
+<div class="example-stack" data-slide="pushup-camera" data-slide-title="측면에서 촬영하기"><aside class="callout"><div><strong>노트북을 옆으로 돌려놓으세요</strong><p>정면에서는 팔의 세 관절이 겹쳐 팔꿈치 각도가 잘 잡히지 않을 수 있습니다. 노트북 카메라가 몸의 옆모습을 보도록 옆에 두고, 어깨부터 손목까지 화면에 들어오게 위치를 맞추세요. 횟수가 안 오르면 화면의 각도가 굽힘·펴짐 기준을 모두 통과하는지 먼저 확인합니다.</p></div></aside><aside class="callout"><div><strong>직접 해보기</strong><p>세 번호를 11·13·15로 바꿔 왼팔을 추적해 보세요. 이어서 160도와 90도를 하나씩 조절하고, 어떤 자세에서 상태가 바뀌는지 관찰하세요. 측정값에 맞춰 프로그램 기준을 시험하는 것이며, 숫자를 맞추려고 무리해서 움직일 필요는 없습니다.</p></div></aside></div>
+</div>
+      </section>
+
+      <section class="lecture-section" id="step2" aria-labelledby="step2-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">STEP 2 · 25MIN</p>
+          <h2 id="step2-title">팔벌려뛰기 — 각도가 안 통할 때</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="jack-question" data-slide-title="이번에도 각도면 될까요?"><h3>팔벌려뛰기를 각도로 재려면 어느 관절을 봐야 할까요?</h3><p>팔을 내렸다가 머리 위로 올리는 모습을 떠올려 보세요. 방금 쓴 팔꿈치 각도가 크게 달라질까요? 답을 열기 전에 측정할 관절을 하나 골라 이유를 말해 보세요.</p><details class="card" id="jack-angle-question"><summary aria-controls="jack-angle-answer">생각한 뒤 답 확인하기</summary><div class="example-stack" id="jack-angle-answer"><p>팔꿈치를 편 채 팔을 올리면 팔꿈치 각도는 거의 그대로입니다. 이 각도만으로는 팔이 아래에 있는지 위에 있는지 구분하기 어렵습니다. 이번에는 손목이 어디까지 올라갔는지, 발목이 얼마나 벌어졌는지를 직접 비교하겠습니다.</p><p>다른 관절의 각도를 활용하는 설계도 가능하지만, 방금의 ‘접혔다 펴지는 관절 하나’ 레시피를 그대로 적용하는 것은 적절하지 않습니다.</p></div></details></div>
+<div class="example-stack" data-slide="jack-why" data-slide-title="접힘과 위치 이동은 다르다"><p>스쿼트는 무릎이, 푸쉬업은 팔꿈치가 접혔다 펴집니다. 그래서 그 관절의 각도가 동작을 잘 나타냈습니다. 팔벌려뛰기에서 우리가 확인하려는 것은 <strong>팔이 위로 올라갔는지와 다리가 옆으로 벌어졌는지</strong>입니다.</p><p>관절이 전혀 회전하지 않는다는 뜻이 아닙니다. 팔꿈치의 굽힘보다 손목의 높이와 발 사이 간격이 원하는 자세를 더 직접적으로 알려 준다는 뜻입니다. 같은 함수를 쓸 수 있는지보다 먼저, 무엇을 재야 하는지 물어봐야 합니다.</p></div>
+<div class="table-scroll" role="region" aria-label="운동별 측정 도구 비교" tabindex="0" data-slide="jack-table" data-slide-title="동작에 맞는 측정 도구"><table class="landmark-table recipe-comparison"><caption>동작의 차이가 측정 도구를 바꿉니다</caption><thead><tr><th scope="col">운동</th><th scope="col">동작의 성격</th><th scope="col">측정 도구</th></tr></thead><tbody><tr><th scope="row">스쿼트</th><td>무릎이 접힘</td><td>각도</td></tr><tr><th scope="row">푸쉬업</th><td>팔꿈치가 접힘</td><td>각도</td></tr><tr class="recipe-same"><th scope="row">팔벌려뛰기</th><td>팔과 다리가 이동</td><td>위치와 거리</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="jack-measure" data-slide-title="두 가지 측정으로 바꾸기"><p>두 손목이 모두 코보다 위에 있고, 두 발목의 간격이 어깨너비의 1.3배를 넘으면 벌린 자세로 판단합니다. 아래는 실제 파일의 측정 부분입니다.</p></div>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 53–59줄" data-source="files/practice2_jumpingjack.py" data-source-lines="53-59" data-slide="jack-measure" data-slide-title="두 가지 측정으로 바꾸기"><code>        # --- (측정 1) 두 손목이 모두 코보다 위에 있나? (팔 올림) ---
+        arms_up = (l_wrist.y &lt; nose.y) and (r_wrist.y &lt; nose.y)
+
+        # --- (측정 2) 발 사이 거리가 어깨너비보다 넓나? (다리 벌림) ---
+        shoulder_width = abs(l_shoulder.x - r_shoulder.x)
+        ankle_gap      = abs(l_ankle.x - r_ankle.x)
+        legs_open      = ankle_gap &gt; shoulder_width * 1.3</code></pre>
+<div class="example-stack" data-slide="jack-y" data-slide-title="위에 있으면 y가 작다"><aside class="callout"><div><strong>화면 위쪽이 y = 0입니다</strong><p>화면 아래로 갈수록 y가 커지므로 ‘코보다 위에 있다’는 <code>손목.y &lt; 코.y</code>입니다. 예를 들어 코가 0.3, 손목이 0.1이면 손목이 더 위에 있습니다. 두 손목 모두 이 조건을 만족해야 하므로 <code>and</code>로 연결합니다.</p></div></aside><p>화면 안의 좌표는 너비와 높이를 기준으로 한 0~1 비율값입니다. 두 y값의 순서만 비교할 때는 픽셀로 바꿀 필요가 없습니다. Level 1에서 글자를 그릴 위치를 구할 때는 화면 크기를 곱했지만, 여기서는 위치 관계만 판단하므로 그대로 비교합니다.</p></div>
+<div class="example-stack" data-slide="jack-width" data-slide-title="왜 어깨너비의 1.3배일까요?"><p><code>abs</code>는 좌우 좌표의 차이를 양수인 간격으로 바꿉니다. 발 간격을 고정된 픽셀 수로 정하면 체격이나 카메라와의 거리에 따라 조건이 달라집니다. 대신 같은 화면 속 <strong>자기 어깨너비</strong>와 비교하면 사람마다 크기가 다른 영향을 줄일 수 있습니다.</p><p>x축 간격끼리 비교하므로 둘 다 화면 너비를 곱해도 비율은 같습니다. 화면 해상도를 바꾸어도 같은 방식으로 비교할 수 있지만, 촬영 방향이나 관절 인식 오차까지 없어지는 것은 아닙니다.</p><p><strong>1.3은 수학적으로 정해진 상수가 아니라 실습에서 시험해 정한 조정값</strong>입니다. 어깨너비보다 조금 더 벌려야 인정하도록 여유를 둔 것입니다. 값을 높이면 더 넓게 벌려야 참이 되고, 낮추면 더 쉽게 참이 됩니다.</p></div>
+<div class="example-stack" data-slide="jack-run" data-slide-title="전체 파일 실행하기"><h3>측정은 바뀌어도 카운트 구조는 같습니다</h3><p><code>python practice2_jumpingjack.py</code>로 실행하세요. 아래 블록을 순서대로 이어 보면 다운로드 파일 전체입니다. 먼저 차렷 자세로 서고, 손과 발이 화면에 모두 들어오는지 확인합니다.</p><a class="button" href="files/practice2_jumpingjack.py" download>practice2_jumpingjack.py 전체 다운로드</a></div>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 1–20줄" data-source="files/practice2_jumpingjack.py" data-source-lines="1-20" data-file-part="practice2_jumpingjack.py" data-slide="jack-code-1" data-slide-title="파일 안내와 라이브러리"><code>"""
+========================================================================
+practice2_jumpingjack.py  -  팔벌려뛰기 카운터 (★위치 기반★)
+========================================================================
+[오늘의 핵심 "아하!" 포인트]
+  팔벌려뛰기는 '각도'로 잡기 어렵다!
+    - 스쿼트/푸쉬업 = 관절이 "접혔다 펴졌다" → 각도가 딱 맞음
+    - 팔벌려뛰기   = 팔이 "위로", 다리가 "옆으로" → 각도보다 '위치/거리'!
+
+  그래서 측정 방법을 바꾼다:
+    - 팔 올림 판정 :  손목 y &lt; 코 y      (y는 작을수록 화면 위쪽!)
+    - 다리 벌림 판정:  두 발목 사이 x거리 &gt; 어깨너비       (벌어졌나?)
+
+  ※ MediaPipe 좌표는 0~1 비율값이라 화면 크기와 무관하게 비교 가능!
+
+실행:  python practice2_jumpingjack.py    (종료: q)
+========================================================================
+"""
+import cv2
+import mediapipe as mp</code></pre>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 21–30줄" data-source="files/practice2_jumpingjack.py" data-source-lines="21-30" data-file-part="practice2_jumpingjack.py" data-slide="jack-code-21" data-slide-title="차렷 자세로 시작"><code>
+mp_pose = mp.solutions.pose
+mp_draw = mp.solutions.drawing_utils
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+cap = cv2.VideoCapture(0)  # 기본 카메라. 안 잡히면 1로 변경
+
+count = 0
+stage = "DOWN"        # 시작은 팔 내린 상태(차렷)
+</code></pre>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 31–43줄" data-source="files/practice2_jumpingjack.py" data-source-lines="31-43" data-file-part="practice2_jumpingjack.py" data-slide="jack-code-31" data-slide-title="프레임 읽기와 인식"><code>while True:
+    success, frame = cap.read()
+    if not success:
+        print("❌ 프레임 읽기 실패")
+        break
+
+    frame = cv2.flip(frame, 1)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(rgb)
+
+    if results.pose_landmarks:
+        lm = results.pose_landmarks.landmark
+</code></pre>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 44–60줄" data-source="files/practice2_jumpingjack.py" data-source-lines="44-60" data-file-part="practice2_jumpingjack.py" data-slide="jack-code-44" data-slide-title="필요한 좌표와 두 측정"><code>        # --- 필요한 위치 가져오기 ---
+        nose       = lm[0]
+        l_wrist    = lm[15]
+        r_wrist    = lm[16]
+        l_shoulder = lm[11]
+        r_shoulder = lm[12]
+        l_ankle    = lm[27]
+        r_ankle    = lm[28]
+
+        # --- (측정 1) 두 손목이 모두 코보다 위에 있나? (팔 올림) ---
+        arms_up = (l_wrist.y &lt; nose.y) and (r_wrist.y &lt; nose.y)
+
+        # --- (측정 2) 발 사이 거리가 어깨너비보다 넓나? (다리 벌림) ---
+        shoulder_width = abs(l_shoulder.x - r_shoulder.x)
+        ankle_gap      = abs(l_ankle.x - r_ankle.x)
+        legs_open      = ankle_gap &gt; shoulder_width * 1.3
+</code></pre>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 61–74줄" data-source="files/practice2_jumpingjack.py" data-source-lines="61-74" data-file-part="practice2_jumpingjack.py" data-slide="jack-code-61" data-slide-title="벌린 자세 판정과 카운트"><code>        # --- 동작 판정: 팔도 올리고 다리도 벌리면 "벌린 자세(UP)" ---
+        is_open = arms_up and legs_open
+
+        # --- 카운트 (스쿼트와 똑같은 상태머신!) ---
+        if not is_open:                       # 모은 자세
+            stage = "DOWN"
+        if is_open and stage == "DOWN":       # 모았다가 벌린 순간!
+            stage = "UP"
+            count += 1
+            print(f"🤸 팔벌려뛰기 {count}회!")
+
+        mp_draw.draw_landmarks(frame, results.pose_landmarks,
+                               mp_pose.POSE_CONNECTIONS)
+</code></pre>
+<pre data-code data-language="python" data-label="practice2_jumpingjack.py · 75–92줄" data-source="files/practice2_jumpingjack.py" data-source-lines="75-92" data-file-part="practice2_jumpingjack.py" data-slide="jack-code-75" data-slide-title="판정값 표시와 종료"><code>        # 현재 판정 상태 표시 (디버깅용 - 학생들이 원리를 보게)
+        cv2.putText(frame, f"arms_up: {arms_up}", (15, 130),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+        cv2.putText(frame, f"legs_open: {legs_open}", (15, 160),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
+    cv2.rectangle(frame, (0, 0), (300, 90), (0, 0, 0), -1)
+    cv2.putText(frame, "JUMPING JACK", (15, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 255), 2)
+    cv2.putText(frame, f"COUNT: {count}", (15, 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+
+    cv2.imshow("AI Jumping Jack Counter", frame)
+    if cv2.waitKey(1) &amp; 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+<div class="example-stack" data-slide="jack-state" data-slide-title="같은 상태머신, 다른 시작 자세"><p>스쿼트와 푸쉬업은 몸이나 팔을 편 상태인 <code>"UP"</code>에서 시작했습니다. 팔벌려뛰기는 팔을 내리고 발을 모은 차렷 자세가 출발점이므로 <code>stage = "DOWN"</code>으로 시작합니다. UP과 DOWN은 모든 운동에서 같은 신체 자세를 뜻하는 이름이 아니라, 각 운동에서 정한 두 상태의 이름입니다.</p><p>카운트의 핵심 구조는 동일합니다. DOWN을 기억하고 있다가 UP 조건이 관측되는 순간에만 1을 더합니다. 그래서 이 파일은 <strong>모았다가 벌리는 순간</strong>을 셉니다. 다만 구현상 <code>not is_open</code>이면 DOWN이므로 손이나 발 중 하나만 조건을 벗어나도 다시 DOWN이 됩니다. 완전히 차렷 자세인지까지 검사하는 코드는 아닙니다.</p></div>
+<div class="example-stack" data-slide="jack-debug" data-slide-title="판정 과정을 화면에서 보기"><p>화면에 <code>arms_up</code>과 <code>legs_open</code>을 그대로 표시하는 것은 장식이 아닙니다. 횟수가 안 오를 때 어느 조건이 <code>False</code>인지 확인하면, 손을 더 올려야 하는지 발 간격을 점검해야 하는지 찾을 수 있습니다. 결과뿐 아니라 중간 판단을 보여 주는 것이 디버깅에 도움이 됩니다.</p><aside class="callout"><div><strong>안 될 때 확인하기</strong><p>전신이 화면에 들어오도록 카메라에서 충분히 떨어지세요. 발목이 잘려 있으면 간격을 제대로 잴 수 없습니다. 한 동작에 여러 번 세어지면 1.3을 조금 키우거나 손목 높이 기준을 코에서 각쪽 어깨로 바꾸어 시험하세요. 한 조건씩 바꾸고 화면의 두 판정값이 흔들리는지 확인합니다. 기준 변경만으로 모든 중복 카운트가 해결되는 것은 아닙니다.</p></div></aside></div>
+<div class="example-stack" data-slide="jack-lesson" data-slide-title="도구는 동작에 맞춰 고른다"><h3>무엇을 재야 하는지 정하는 것이 먼저입니다</h3><p>각도가 만능은 아닙니다. 접힘에는 각도, 높낮이에는 y좌표, 벌어진 정도에는 간격이 잘 맞습니다. 오늘은 측정 방법을 바꾸면서도 상태머신을 다시 만들지 않았습니다.</p><p>다음 ‘만능 코치’에서는 이 경험을 설계로 옮깁니다. 운동마다 다른 측정과 판단은 따로 두고, 여러 운동에 공통인 카운트 부분은 함께 쓰는 구조를 만들겠습니다.</p></div>
+</div>
+      </section>
+
+      <section class="lecture-section" id="step3" aria-labelledby="step3-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">STEP 3 · 20MIN</p>
+          <h2 id="step3-title">만능 코치 만들기</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="coach-problem" data-slide-title="세 프로그램을 하나로"><p>이제 스쿼트·푸쉬업·팔벌려뛰기를 셀 수 있습니다. 하지만 각자 다른 파일이라 종목을 바꾸려면 실행 중인 프로그램을 끄고 다른 파일을 열어야 합니다. <strong>한 프로그램에서 1·2·3 키로 종목을 바꾸려면 어떻게 해야 할까요?</strong></p><p>먼저 운동 이름에 따라 코드를 세 갈래로 나누는 방법이 떠오릅니다. 다음은 실행 코드가 아니라 구조만 보여 주는 비교용 예시입니다.</p><pre data-code data-language="python" data-label="교육용 예시 · 중복 구조 · 실행 불가" data-example="duplicated-branches"><code>if exercise == "squat":
+    # 스쿼트 판정 + 카운트
+elif exercise == "pushup":
+    # 푸쉬업 판정 + 카운트
+elif exercise == "jack":
+    # 팔벌려뛰기 판정 + 카운트</code></pre></div>
+<div class="example-stack" data-slide="coach-duplication" data-slide-title="복사한 코드는 함께 고쳐야 한다"><p>이렇게 각 갈래에 판정과 카운트를 통째로 넣으면 같은 카운트 로직이 세 번 복사됩니다. 운동 하나를 추가할 때마다 <code>elif</code>와 카운트 코드도 늘어납니다. 카운트 방식을 고칠 때 세 군데 중 한 곳을 빠뜨리면 특정 종목에서만 오류가 생깁니다.</p><p><code>if / elif</code> 자체가 나쁜 문법은 아닙니다. 여기서 피하려는 것은 <strong>동일한 동작을 여러 곳에서 따로 관리하는 중복</strong>입니다.</p><aside class="callout"><div><strong>앞의 ‘큰 그림’을 다시 떠올려 보세요</strong><p>달라지는 것은 지금 자세가 UP인지 DOWN인지 판단하는 방법입니다. 그대로인 것은 DOWN을 기억했다가 UP으로 바뀔 때 1을 더하는 로직입니다. 다른 부분만 함수로 빼고, 같은 부분은 하나만 두면 됩니다.</p></div></aside></div>
+<div class="example-stack" data-slide="coach-contract" data-slide-title="판정 함수의 약속"><h3>입력과 출력 모양을 맞추면 바꿔 끼울 수 있습니다</h3><p>세 함수는 모두 랜드마크 목록 <code>lm</code> 하나를 받습니다. 반환값은 공통 약속인 <code>"UP"</code>, <code>"DOWN"</code>, <code>None</code> 중 하나입니다. 관절이나 계산법이 달라도 호출하는 쪽은 이 약속만 알면 됩니다.</p><p>함수 안에서는 운동에 맞게 측정하고, 함수 밖에서는 반환된 상태만 읽겠습니다. 아래에서 같은 함수 모양 속에 서로 다른 판단이 들어가는지 확인하세요.</p></div>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 39–46줄" data-source="files/practice3_multi_coach.py" data-source-lines="39-46" data-slide="coach-squat" data-slide-title="스쿼트 판정 함수"><code>def squat_state(lm):
+    hip   = [lm[24].x, lm[24].y]
+    knee  = [lm[26].x, lm[26].y]
+    ankle = [lm[28].x, lm[28].y]
+    angle = calculate_angle(hip, knee, ankle)
+    if 70 &lt; angle &lt;= 100: return "DOWN"  # 정자세 구간
+    if angle &gt; 160:  return "UP"
+    return None</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 48–55줄" data-source="files/practice3_multi_coach.py" data-source-lines="48-55" data-slide="coach-pushup" data-slide-title="푸쉬업 판정 함수"><code>def pushup_state(lm):
+    shoulder = [lm[12].x, lm[12].y]
+    elbow    = [lm[14].x, lm[14].y]
+    wrist    = [lm[16].x, lm[16].y]
+    angle = calculate_angle(shoulder, elbow, wrist)
+    if angle &lt; 90:   return "DOWN"
+    if angle &gt; 160:  return "UP"
+    return None</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 57–61줄" data-source="files/practice3_multi_coach.py" data-source-lines="57-61" data-slide="coach-jack" data-slide-title="팔벌려뛰기 판정 함수"><code>def jack_state(lm):
+    arms_up = (lm[15].y &lt; lm[0].y) and (lm[16].y &lt; lm[0].y)
+    shoulder_width = abs(lm[11].x - lm[12].x)
+    legs_open = abs(lm[27].x - lm[28].x) &gt; shoulder_width * 1.3
+    return "UP" if (arms_up and legs_open) else "DOWN"</code></pre>
+<div class="example-stack" data-slide="coach-none" data-slide-title="None은 이전 상태를 유지하라는 뜻"><p>스쿼트 각도가 120도이면 정자세 DOWN도, 충분히 편 UP도 아닙니다. 이때 <code>None</code>은 ‘판단 보류’입니다. 공통 카운트 코드는 이를 받으면 <code>stage</code>를 바꾸지 않습니다.</p><p>90도에서 DOWN에 들어간 뒤 120도를 지나도 앉았다는 기억이 남고, 170도에서 올라온 한 번을 셉니다. 반대로 65도만 관측하고 다시 170도가 되면 DOWN에 들어간 적이 없어 세지 않습니다. Level 1에서 정자세를 거쳐야 세도록 고친 기준을 유지하는 설계입니다.</p><aside class="callout"><div><strong>jack_state는 None을 사용하지 않습니다</strong><p>이 예제는 손과 발 조건을 모두 만족하면 UP, 아니면 DOWN으로 분류합니다. 위치 기반이라 중간 자세가 본래 없는 것은 아닙니다. 중간 자세를 따로 보류하지 않는 이진 판정을 선택한 것입니다.</p></div></aside></div>
+<div class="example-stack" data-slide="coach-data-intro" data-slide-title="함수도 값입니다"><h3>운동의 정보를 한곳에 모읍시다</h3><p>파이썬의 <code>dict</code>는 이름표인 키로 값을 찾는 자료구조입니다. 문자열이나 숫자뿐 아니라 <strong>함수 자체도 값으로 넣을 수 있습니다.</strong> 운동마다 이름, 판정 함수, 화면 색을 한 묶음으로 저장해 보겠습니다.</p></div>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 67–71줄" data-source="files/practice3_multi_coach.py" data-source-lines="67-71" data-slide="coach-data" data-slide-title="EXERCISES에 운동 등록"><code>EXERCISES = {
+    ord('1'): {"name": "SQUAT",        "state": squat_state,  "color": (0, 255, 0)},
+    ord('2'): {"name": "PUSH-UP",      "state": pushup_state, "color": (0, 200, 255)},
+    ord('3'): {"name": "JUMPING JACK", "state": jack_state,   "color": (255, 0, 255)},
+}</code></pre>
+<div class="example-stack" data-slide="coach-function-value" data-slide-title="괄호가 없는 이유"><p><code>"state": squat_state</code>는 함수를 지금 실행하는 것이 아니라, 나중에 호출할 함수를 저장하는 표현입니다. 반면 <code>squat_state(...)</code>처럼 괄호를 붙이면 그 자리에서 호출해 반환값을 얻게 됩니다. <code>squat_state()</code>만 쓰면 필요한 <code>lm</code> 인자가 없어 오류도 납니다.</p><p><code>ord('1')</code>은 문자 ‘1’의 코드값인 49입니다. 영상 창에서 1번 키를 눌러 받은 값과 이 키를 연결합니다. <code>"name"</code>은 화면 이름, <code>"state"</code>는 판단 방법, <code>"color"</code>는 OpenCV의 BGR 색입니다.</p><p>판단 알고리즘 자체는 함수 안의 코드로 남습니다. 대신 <strong>어떤 운동에 어떤 함수와 표시 정보를 연결할지</strong>를 데이터로 정의했습니다. 선택 부분이 운동별 알고리즘을 알 필요가 없어진 것입니다.</p></div>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 93–101줄" data-source="files/practice3_multi_coach.py" data-source-lines="93-101" data-slide="coach-count" data-slide-title="모든 운동이 공유하는 카운트"><code>        # ★ 운동마다 다른 부분: 자세 판정 (함수만 갈아끼움) ★
+        state = current["state"](lm)
+
+        # ★ 모든 운동이 공유하는 부분: 카운트 로직 ★
+        if state == "DOWN":
+            stage = "DOWN"
+        elif state == "UP" and stage == "DOWN":
+            stage = "UP"
+            count += 1</code></pre>
+<div class="example-stack" data-slide="coach-call" data-slide-title="current의 함수를 꺼내 호출하기"><ol class="math-steps"><li><code>current</code>는 현재 선택한 운동의 정보 묶음입니다.</li><li><code>current["state"]</code>로 그 운동의 판정 함수를 꺼냅니다.</li><li>바로 뒤의 <code>(lm)</code>으로 현재 랜드마크를 전달하며 호출합니다.</li><li>반환된 값을 <code>state</code>에 담고 공통 카운트 로직에 넘깁니다.</li></ol><p>1번 종목이면 <code>squat_state(lm)</code>, 2번이면 <code>pushup_state(lm)</code>가 실행됩니다. 꺼내지는 함수만 달라지고 그 아래 카운트 코드는 전혀 바뀌지 않습니다.</p></div>
+<div class="example-stack" data-slide="coach-lunge-intro" data-slide-title="런지 하나를 추가한다면"><p>이제 새 운동마다 카운트 코드를 복사할 필요가 없습니다. ① <code>lunge_state(lm)</code>를 만들고 ② <code>EXERCISES</code>에 한 줄을 등록하면 됩니다. 카운트 부분은 손대지 않습니다.</p><p>힌트: 한쪽 엉덩이–무릎–발목으로 무릎 각도를 재 보세요. 어떤 값을 반환해야 기존 카운트 코드가 그대로 받아들일까요?</p></div>
+<div class="example-stack" data-slide="coach-lunge-answer" data-slide-title="런지 판정 예시 확인"><details class="card" id="lunge-question"><summary aria-controls="lunge-answer">생각한 뒤 런지 예시 확인하기</summary><div class="example-stack" id="lunge-answer"><p>교육용 확장 예시입니다. 다운로드 파일에는 없습니다. 기존 calculate_angle과 lm을 사용하며, 한쪽 무릎만 보므로 런지 자세 전체를 검증하지는 않습니다.</p><pre data-code data-language="python" data-label="교육용 예시 · 파일에 추가해 보는 확장 코드" data-example="lunge-extension"><code>def lunge_state(lm):
+    hip = [lm[24].x, lm[24].y]
+    knee = [lm[26].x, lm[26].y]
+    ankle = [lm[28].x, lm[28].y]
+    angle = calculate_angle(hip, knee, ankle)
+    if 70 &lt; angle &lt;= 100: return "DOWN"
+    if angle &gt; 160: return "UP"
+    return None
+
+EXERCISES[ord('4')] = {"name": "LUNGE", "state": lunge_state, "color": (0, 255, 0)}</code></pre><p>함수는 등록문보다 먼저 정의하고, 등록은 EXERCISES 정의 뒤·메인 루프 앞에 둡니다. 화면의 키 안내 문구도 새 종목에 맞춰 고치면 됩니다.</p></div></details></div>
+<div class="example-stack" data-slide="coach-full-intro" data-slide-title="전체 파일 연결해 보기"><p><code>python practice3_multi_coach.py</code>로 실행하고 1·2·3 키로 종목을 바꿔 보세요. 아래는 파일 전체를 기능별로 나눈 원문입니다. 판정 함수와 데이터 정의가 반복문 앞에 있고, 반복문에서는 함수를 선택해 호출한다는 배치를 보세요.</p><a class="button" href="files/practice3_multi_coach.py" download>practice3_multi_coach.py 전체 다운로드</a></div>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 1–19줄" data-source="files/practice3_multi_coach.py" data-source-lines="1-19" data-file-part="practice3_multi_coach.py" data-slide="coach-full-1" data-slide-title="파일 안내와 준비"><code>"""
+========================================================================
+practice3_multi_coach.py  -  만능 운동 코치 (종목 전환)
+========================================================================
+[오늘의 핵심: 추상화 / 데이터로 설계하기]
+  스쿼트 / 푸쉬업 / 팔벌려뛰기 ... 운동이 달라도
+  "카운트 로직"은 완전히 똑같다!  (UP &lt;-&gt; DOWN 상태머신)
+
+  달라지는 건 "지금 자세가 UP이냐 DOWN이냐"를 판단하는 부분 뿐.
+  -&gt; 그 판단 부분만 함수로 따로 빼고,
+     카운트 로직은 하나로 공유하자!
+
+  조작:  [1] 스쿼트   [2] 푸쉬업   [3] 팔벌려뛰기   [q] 종료
+========================================================================
+"""
+import cv2
+import numpy as np
+import mediapipe as mp
+</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 20–38줄" data-source="files/practice3_multi_coach.py" data-source-lines="20-38" data-file-part="practice3_multi_coach.py" data-slide="coach-full-20" data-slide-title="각도 함수와 반환 약속"><code>def calculate_angle(a, b, c):
+    """b를 꼭짓점으로 하는 a-b-c 각도(도)를 반환"""
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    # Level 1과 같은 벡터 내적 + arccos
+    ba = a - b
+    bc = c - b
+    dot_product = np.dot(ba, bc)
+    magnitude_ba = np.linalg.norm(ba)
+    magnitude_bc = np.linalg.norm(bc)
+    cosine_angle = dot_product / (magnitude_ba * magnitude_bc)
+    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
+    return np.degrees(np.arccos(cosine_angle))
+
+# ----------------------------------------------------------------------
+# [운동별 "자세 판정" 함수]  각 함수는 "UP" / "DOWN" / None 을 반환
+#   None = 애매한 중간 자세 (상태를 바꾸지 않음)
+# ----------------------------------------------------------------------</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 39–56줄" data-source="files/practice3_multi_coach.py" data-source-lines="39-56" data-file-part="practice3_multi_coach.py" data-slide="coach-full-39" data-slide-title="각도 기반 판정"><code>def squat_state(lm):
+    hip   = [lm[24].x, lm[24].y]
+    knee  = [lm[26].x, lm[26].y]
+    ankle = [lm[28].x, lm[28].y]
+    angle = calculate_angle(hip, knee, ankle)
+    if 70 &lt; angle &lt;= 100: return "DOWN"  # 정자세 구간
+    if angle &gt; 160:  return "UP"
+    return None
+
+def pushup_state(lm):
+    shoulder = [lm[12].x, lm[12].y]
+    elbow    = [lm[14].x, lm[14].y]
+    wrist    = [lm[16].x, lm[16].y]
+    angle = calculate_angle(shoulder, elbow, wrist)
+    if angle &lt; 90:   return "DOWN"
+    if angle &gt; 160:  return "UP"
+    return None
+</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 57–72줄" data-source="files/practice3_multi_coach.py" data-source-lines="57-72" data-file-part="practice3_multi_coach.py" data-slide="coach-full-57" data-slide-title="위치 판정과 운동 데이터"><code>def jack_state(lm):
+    arms_up = (lm[15].y &lt; lm[0].y) and (lm[16].y &lt; lm[0].y)
+    shoulder_width = abs(lm[11].x - lm[12].x)
+    legs_open = abs(lm[27].x - lm[28].x) &gt; shoulder_width * 1.3
+    return "UP" if (arms_up and legs_open) else "DOWN"
+
+# ----------------------------------------------------------------------
+# [운동을 "데이터"로 정의]  이름 + 판정함수 + 색깔
+#   새 운동을 추가하고 싶으면? 여기에 한 줄만 추가하면 끝!
+# ----------------------------------------------------------------------
+EXERCISES = {
+    ord('1'): {"name": "SQUAT",        "state": squat_state,  "color": (0, 255, 0)},
+    ord('2'): {"name": "PUSH-UP",      "state": pushup_state, "color": (0, 200, 255)},
+    ord('3'): {"name": "JUMPING JACK", "state": jack_state,   "color": (255, 0, 255)},
+}
+</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 73–91줄" data-source="files/practice3_multi_coach.py" data-source-lines="73-91" data-file-part="practice3_multi_coach.py" data-slide="coach-full-73" data-slide-title="초기화와 영상 처리"><code>mp_pose = mp.solutions.pose
+mp_draw = mp.solutions.drawing_utils
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+cap = cv2.VideoCapture(0)  # 기본 카메라. 안 잡히면 1로 변경
+
+current = EXERCISES[ord('1')]   # 시작 운동 = 스쿼트
+count = 0
+stage = "UP"
+
+while True:
+    success, frame = cap.read()
+    if not success:
+        break
+    frame = cv2.flip(frame, 1)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(rgb)
+
+    if results.pose_landmarks:
+        lm = results.pose_landmarks.landmark</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 92–105줄" data-source="files/practice3_multi_coach.py" data-source-lines="92-105" data-file-part="practice3_multi_coach.py" data-slide="coach-full-92" data-slide-title="공통 카운트와 뼈대"><code>
+        # ★ 운동마다 다른 부분: 자세 판정 (함수만 갈아끼움) ★
+        state = current["state"](lm)
+
+        # ★ 모든 운동이 공유하는 부분: 카운트 로직 ★
+        if state == "DOWN":
+            stage = "DOWN"
+        elif state == "UP" and stage == "DOWN":
+            stage = "UP"
+            count += 1
+
+        mp_draw.draw_landmarks(frame, results.pose_landmarks,
+                               mp_pose.POSE_CONNECTIONS)
+</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 106–116줄" data-source="files/practice3_multi_coach.py" data-source-lines="106-116" data-file-part="practice3_multi_coach.py" data-slide="coach-full-106" data-slide-title="운동 정보 표시"><code>    cv2.rectangle(frame, (0, 0), (340, 95), (0, 0, 0), -1)
+    cv2.putText(frame, current["name"], (15, 32),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, current["color"], 2)
+    cv2.putText(frame, f"COUNT: {count}", (15, 75),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
+    cv2.putText(frame, "[1]Squat [2]Push-up [3]Jack [q]Quit",
+                (15, frame.shape[0] - 20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1)
+
+    cv2.imshow("AI Multi Coach", frame)
+</code></pre>
+<pre data-code data-language="python" data-label="practice3_multi_coach.py · 117–127줄" data-source="files/practice3_multi_coach.py" data-source-lines="117-127" data-file-part="practice3_multi_coach.py" data-slide="coach-full-117" data-slide-title="종목 전환과 종료"><code>    key = cv2.waitKey(1) &amp; 0xFF
+    if key == ord('q'):
+        break
+    if key in EXERCISES:                 # 종목 전환!
+        current = EXERCISES[key]
+        count = 0                        # 새 운동 시작 -&gt; 0부터
+        stage = "UP"
+        print(f"➡️  {current['name']} 모드로 전환!")
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+<div class="example-stack" data-slide="coach-summary" data-slide-title="이 설계의 이름은 추상화"><p>종목 전환에서는 <code>current = EXERCISES[key]</code>로 정보 묶음을 바꾸고 횟수와 상태를 초기화합니다. 판정 함수, 이름, 색이 함께 바뀌므로 선택 코드에 운동별 세부 동작을 넣을 필요가 없습니다.</p><aside class="callout"><div><strong>같은 것과 다른 것을 나누고, 다른 것만 갈아 끼운다</strong><p>세부 차이를 공통 약속 뒤에 감추는 이런 설계를 추상화라고 부릅니다. 여기서 공통 약속은 ‘랜드마크를 받아 상태를 반환한다’입니다. 복잡한 이름을 외우기보다, 카운트 코드가 어떤 운동인지 몰라도 동작한다는 사실을 기억하세요.</p></div></aside><p>게임 캐릭터의 행동, 앱의 화면 전환, AI 모델의 교체도 입력·출력 약속을 맞추면 같은 원리로 구성할 수 있습니다. 구현이 달라져도 연결하는 쪽은 그대로 두는 것입니다.</p></div>
+</div>
+      </section>
+
+      <section class="lecture-section" id="step4" aria-labelledby="step4-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">STEP 4 · 10MIN</p>
+          <h2 id="step4-title">완성판 시연</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="king-demo" data-slide-title="지금은 선생님 시연 시간"><p>이제 학생이 코드를 따라 치는 시간이 아니라, <strong>선생님이 완성판을 시연하고 학생은 관찰하는 시간</strong>입니다. 1·2·3으로 종목을 바꾼 뒤 s를 눌렀을 때 화면이 어떻게 달라지는지 보세요.</p><p>practice3의 코치에 <strong>60초 도전, 3초 카운트다운, 남은 시간 진행 바, 종목별 최고 기록, 큰 카운트 UI</strong>를 더했습니다. 기록은 실행 중 메모리에 유지되며 프로그램을 종료하면 사라집니다.</p><a class="button button-primary" href="files/practice4_workout_king.py" download>practice4_workout_king.py 전체 다운로드</a></div>
+<div class="table-scroll" role="region" aria-label="완성판 구조 지도" tabindex="0" data-slide="king-map" data-slide-title="완성판 구조 지도"><table class="landmark-table recipe-comparison"><caption>완성판 구조 지도</caption><thead><tr><th scope="col">구성</th><th scope="col">재사용 / 추가</th><th scope="col">하는 일</th></tr></thead><tbody><tr><th scope="row">calculate_angle</th><td><span class="recipe-change">재사용</span></td><td>Level 1과 같은 내적＋arccos 계산</td></tr><tr><th scope="row">squat / pushup / jack_state</th><td><span class="recipe-change">재사용</span></td><td>practice3과 같은 판정 기준·반환 약속</td></tr><tr><th scope="row">EXERCISES</th><td><span class="recipe-change">재사용</span></td><td>practice3의 종목·함수·색 연결</td></tr><tr><th scope="row">mode 상태 전환</th><td><strong>새로 추가</strong></td><td>연습 → 준비 → 측정 → 결과</td></tr><tr><th scope="row">UI 그리기</th><td><strong>확장 추가</strong></td><td>기존 표시를 큰 숫자·타이머·결과 화면으로 확장</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="king-mode-intro" data-slide-title="서로 다른 두 상태머신"><p><strong>PRACTICE → READY → PLAY → RESULT</strong></p><p>UP/DOWN은 ‘운동 동작이 어디까지 진행됐나’를 기억합니다. 이번 <code>mode</code>는 ‘프로그램이 연습 중인가, 경기 중인가’를 기억합니다. 같은 상태머신 개념을 다른 층위에 적용한 것입니다.</p><p><code>counting = mode in ("PRACTICE", "PLAY")</code>는 연습과 측정 중에만 참입니다. 이 값으로 공통 카운트 실행 여부를 정하므로 준비·결과 화면에서는 횟수가 늘지 않습니다.</p></div>
+<div class="table-scroll" role="region" aria-label="네 가지 프로그램 상태" tabindex="0" data-slide="king-modes" data-slide-title="네 가지 프로그램 상태"><table class="landmark-table recipe-comparison"><caption>네 가지 프로그램 상태</caption><thead><tr><th scope="col">mode</th><th scope="col">하는 일</th><th scope="col">횟수와 기록</th></tr></thead><tbody><tr><th scope="row">PRACTICE</th><td>자유 연습</td><td>카운트하지만 최고 기록에 반영하지 않음</td></tr><tr><th scope="row">READY</th><td>3초 카운트다운</td><td>세지 않음 · PLAY 진입 때 횟수 초기화</td></tr><tr><th scope="row">PLAY</th><td>60초 측정</td><td>도전 횟수를 셈</td></tr><tr><th scope="row">RESULT</th><td>결과 표시</td><td>진입 직전에 결과 확정·최고 기록 갱신</td></tr></tbody></table></div>
+<div class="table-scroll" role="region" aria-label="영상 창에서 사용하는 조작키" tabindex="0" data-slide="king-keys" data-slide-title="영상 창에서 사용하는 조작키"><table class="landmark-table recipe-comparison"><caption>영상 창에서 사용하는 조작키</caption><thead><tr><th scope="col">키</th><th scope="col">기능</th><th scope="col">사용 조건</th></tr></thead><tbody><tr><th scope="row"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></th><td>스쿼트 / 푸쉬업 / 팔벌려뛰기 선택</td><td>PLAY 중에는 변경 불가</td></tr><tr><th scope="row"><kbd>s</kbd></th><td>60초 도전 준비 시작</td><td>PLAY 중에는 무시</td></tr><tr><th scope="row"><kbd>r</kbd></th><td>횟수·상태 초기화, 연습 복귀</td><td>최고 기록은 유지 · 경기 중에도 가능</td></tr><tr><th scope="row"><kbd>q</kbd></th><td>프로그램 종료</td><td>영상 창에 포커스</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="king-source-intro" data-slide-title="구조만 짚고 나머지는 파일로"><p>아래에는 읽기용으로 파일 전체를 남겼습니다. 발표에서는 모드 전환 코드만 짚고, 재사용 함수와 나머지 UI 코드는 건너뜁니다. S로 포함하면 모든 코드 조각을 볼 수 있습니다.</p><p>판정 함수는 practice3의 중간 좌표 변수를 줄여 작성했지만 계산·기준은 같습니다. ‘재사용’은 모든 줄의 표기가 같다는 뜻이 아니라 같은 알고리즘과 약속을 유지한다는 뜻입니다.</p></div>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 1–17줄" data-source="files/practice4_workout_king.py" data-source-lines="1-17" data-file-part="practice4_workout_king.py" data-slide="king-full-1" data-slide-title="읽기용 · 안내와 import" data-slide-skip><code>"""
+========================================================================
+practice4_workout_king.py  -  AI 운동왕 완성판 (60초 도전 + UI)
+========================================================================
+practice3의 만능 코치에 "경기 모드"를 더한 최종 버전!
+  - [s] 키 : 60초 도전 시작  (카운트다운 후 측정)
+  - 60초가 끝나면 기록 표시, 종목별 최고 기록 저장
+  - 큰 카운트 UI / 진행 바 / 상태 표시
+
+조작:  [1]스쿼트 [2]푸쉬업 [3]팔벌려뛰기   [s]60초 도전   [r]리셋   [q]종료
+========================================================================
+"""
+import cv2
+import time
+import numpy as np
+import mediapipe as mp
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 18–32줄" data-source="files/practice4_workout_king.py" data-source-lines="18-32" data-file-part="practice4_workout_king.py" data-slide="king-full-18" data-slide-title="읽기용 · 각도 함수" data-slide-skip><code>def calculate_angle(a, b, c):
+    """b를 꼭짓점으로 하는 a-b-c 각도(도)를 반환"""
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    # Level 1과 같은 벡터 내적 + arccos
+    ba = a - b
+    bc = c - b
+    dot_product = np.dot(ba, bc)
+    magnitude_ba = np.linalg.norm(ba)
+    magnitude_bc = np.linalg.norm(bc)
+    cosine_angle = dot_product / (magnitude_ba * magnitude_bc)
+    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
+    return np.degrees(np.arccos(cosine_angle))
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 33–49줄" data-source="files/practice4_workout_king.py" data-source-lines="33-49" data-file-part="practice4_workout_king.py" data-slide="king-full-33" data-slide-title="읽기용 · 판정 함수" data-slide-skip><code>def squat_state(lm):
+    angle = calculate_angle([lm[24].x, lm[24].y], [lm[26].x, lm[26].y], [lm[28].x, lm[28].y])
+    if 70 &lt; angle &lt;= 100: return "DOWN"  # 정자세 구간
+    if angle &gt; 160: return "UP"
+    return None
+
+def pushup_state(lm):
+    angle = calculate_angle([lm[12].x, lm[12].y], [lm[14].x, lm[14].y], [lm[16].x, lm[16].y])
+    if angle &lt; 90:  return "DOWN"
+    if angle &gt; 160: return "UP"
+    return None
+
+def jack_state(lm):
+    arms_up = (lm[15].y &lt; lm[0].y) and (lm[16].y &lt; lm[0].y)
+    legs_open = abs(lm[27].x - lm[28].x) &gt; abs(lm[11].x - lm[12].x) * 1.3
+    return "UP" if (arms_up and legs_open) else "DOWN"
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 50–69줄" data-source="files/practice4_workout_king.py" data-source-lines="50-69" data-file-part="practice4_workout_king.py" data-slide="king-full-50" data-slide-title="읽기용 · 운동 데이터와 초기 상태" data-slide-skip><code>EXERCISES = {
+    ord('1'): {"name": "SQUAT",        "state": squat_state,  "color": (0, 255, 0)},
+    ord('2'): {"name": "PUSH-UP",      "state": pushup_state, "color": (0, 200, 255)},
+    ord('3'): {"name": "JUMPING JACK", "state": jack_state,   "color": (255, 0, 255)},
+}
+ROUND_SECONDS = 60
+
+mp_pose = mp.solutions.pose
+mp_draw = mp.solutions.drawing_utils
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+cap = cv2.VideoCapture(0)  # 기본 카메라. 안 잡히면 1로 변경
+
+current   = EXERCISES[ord('1')]
+count     = 0
+stage     = "UP"
+mode      = "PRACTICE"          # PRACTICE / READY / PLAY / RESULT
+start_t   = 0
+result    = 0
+best      = {"SQUAT": 0, "PUSH-UP": 0, "JUMPING JACK": 0}
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 70–90줄" data-source="files/practice4_workout_king.py" data-source-lines="70-90" data-file-part="practice4_workout_king.py" data-slide="king-full-70" data-slide-title="읽기용 · 영상과 카운트 허용 모드" data-slide-skip><code>while True:
+    success, frame = cap.read()
+    if not success:
+        break
+    frame = cv2.flip(frame, 1)
+    h, w = frame.shape[:2]
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(rgb)
+
+    counting = mode in ("PRACTICE", "PLAY")
+    if results.pose_landmarks:
+        lm = results.pose_landmarks.landmark
+        state = current["state"](lm)
+        if counting:
+            if state == "DOWN":
+                stage = "DOWN"
+            elif state == "UP" and stage == "DOWN":
+                stage = "UP"
+                count += 1
+        mp_draw.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 91–99줄" data-source="files/practice4_workout_king.py" data-source-lines="91-99" data-file-part="practice4_workout_king.py" data-slide="king-full-91" data-slide-title="READY에서 PLAY로"><code>    # ----- 모드별 처리 -----
+    if mode == "READY":                       # 3초 카운트다운
+        left = 3 - int(time.time() - start_t)
+        if left &lt;= 0:
+            mode, count, stage, start_t = "PLAY", 0, "UP", time.time()
+        else:
+            cv2.putText(frame, str(left), (w // 2 - 40, h // 2),
+                        cv2.FONT_HERSHEY_SIMPLEX, 5, (0, 255, 255), 8)
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 100–106줄" data-source="files/practice4_workout_king.py" data-source-lines="100-106" data-file-part="practice4_workout_king.py" data-slide="king-full-100" data-slide-title="60초 종료와 최고 기록"><code>    if mode == "PLAY":
+        remain = ROUND_SECONDS - (time.time() - start_t)
+        if remain &lt;= 0:
+            result = count
+            if result &gt; best[current["name"]]:
+                best[current["name"]] = result
+            mode = "RESULT"</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 107–122줄" data-source="files/practice4_workout_king.py" data-source-lines="107-122" data-file-part="practice4_workout_king.py" data-slide="king-full-107" data-slide-title="읽기용 · 시간 바와 큰 숫자" data-slide-skip><code>        else:
+            bar_w = int((remain / ROUND_SECONDS) * (w - 40))
+            cv2.rectangle(frame, (20, h - 45), (20 + bar_w, h - 25),
+                          current["color"], -1)
+            cv2.putText(frame, f"{remain:4.1f}s", (w - 150, h - 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+
+    # ----- 상단 정보 박스 -----
+    cv2.rectangle(frame, (0, 0), (380, 110), (0, 0, 0), -1)
+    cv2.putText(frame, current["name"], (15, 35),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.9, current["color"], 2)
+    cv2.putText(frame, str(count), (15, 100),
+                cv2.FONT_HERSHEY_SIMPLEX, 2.2, (255, 255, 255), 4)
+    cv2.putText(frame, f"BEST: {best[current['name']]}", (180, 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 123–135줄" data-source="files/practice4_workout_king.py" data-source-lines="123-135" data-file-part="practice4_workout_king.py" data-slide="king-full-123" data-slide-title="읽기용 · 결과 UI" data-slide-skip><code>    if mode == "RESULT":
+        cv2.rectangle(frame, (w // 2 - 220, h // 2 - 90),
+                      (w // 2 + 220, h // 2 + 90), (0, 0, 0), -1)
+        cv2.putText(frame, "TIME UP!", (w // 2 - 150, h // 2 - 25),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255), 3)
+        cv2.putText(frame, f"SCORE: {result}", (w // 2 - 150, h // 2 + 45),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.3, (255, 255, 255), 3)
+
+    cv2.putText(frame, "[1/2/3]Pick  [s]60s Challenge  [r]Reset  [q]Quit",
+                (15, h - 60), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1)
+
+    cv2.imshow("AI Workout King", frame)
+</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 136–144줄" data-source="files/practice4_workout_king.py" data-source-lines="136-144" data-file-part="practice4_workout_king.py" data-slide="king-full-136" data-slide-title="키 입력에 따른 모드 전환"><code>    key = cv2.waitKey(1) &amp; 0xFF
+    if key == ord('q'):
+        break
+    elif key in EXERCISES and mode != "PLAY":
+        current, count, stage, mode = EXERCISES[key], 0, "UP", "PRACTICE"
+    elif key == ord('s') and mode != "PLAY":
+        mode, start_t = "READY", time.time()
+    elif key == ord('r'):
+        count, stage, mode = 0, "UP", "PRACTICE"</code></pre>
+<pre data-code data-language="python" data-label="practice4_workout_king.py · 145–147줄" data-source="files/practice4_workout_king.py" data-source-lines="145-147" data-file-part="practice4_workout_king.py" data-slide="king-full-145" data-slide-title="읽기용 · 자원 정리" data-slide-skip><code>
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+<div class="example-stack" data-slide="king-observe" data-slide-title="화면에서 전이를 찾아보세요"><p>s를 누르면 READY가 되고, 3초 뒤 PLAY로 넘어가면서 횟수와 시작 시각을 새로 잡습니다. 남은 시간이 0 이하가 되면 현재 횟수를 결과로 옮기고, 기존 최고 기록보다 큰지 비교한 뒤 RESULT로 바뀝니다.</p><p>선생님 시연에서 숫자뿐 아니라 ‘언제 세기 시작하고 멈추는지’를 관찰하세요. 카운트의 상태머신 위에 경기 진행 상태머신을 얹은 것이 완성판의 핵심입니다.</p></div>
+</div>
+      </section>
+
+      <section class="lecture-section" id="challenge" aria-labelledby="challenge-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">CHALLENGE</p>
+          <h2 id="challenge-title">AI 운동왕 5종 경기</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="challenge-start" data-slide-title="3초 준비, 60초 도전"><p>이제 같은 코드로 친구들과 기록을 비교해 봅시다. ‘AI 운동왕 5종 경기’라는 수업 제목 아래, <strong>현재 완성판에서 실제로 겨루는 종목은 스쿼트·푸쉬업·팔벌려뛰기 세 가지</strong>입니다. 플랭크는 다음 보너스 실습이고, 런지는 직접 추가해 보는 확장 예시입니다.</p><ol class="math-steps"><li><strong>종목 선택</strong> — 영상 창에서 1은 스쿼트, 2는 푸쉬업, 3은 팔벌려뛰기입니다. 먼저 한 번씩 시험합니다.</li><li><strong>시작</strong> — 준비가 되면 s를 누릅니다. 3초 카운트다운 뒤 횟수가 초기화되고 60초 측정이 시작됩니다.</li><li><strong>기록</strong> — 시간이 끝나면 결과가 자동으로 나옵니다. SCORE를 기록하고 다음 참가자에게 넘깁니다.</li></ol></div>
+<div class="example-stack" data-slide="challenge-timer" data-slide-title="이번에는 프로그램이 시간을 잽니다"><p>Level 1 토너먼트는 외부 타이머로 60초를 재고 q로 종료했습니다. 이번에는 프로그램이 경기 시간을 재고 결과 화면으로 전환합니다. <strong>60초가 끝나도 프로그램 자체가 종료되는 것은 아닙니다.</strong></p><p>상단의 <code>BEST</code>는 선택한 종목의 최고 기록입니다. 종목별로 따로 기억하지만, 프로그램 실행 중에만 유지됩니다. 참가자별 기록은 아래 표에 별도로 적으세요. r은 현재 횟수를 초기화해도 BEST를 지우지 않습니다.</p></div>
+<div class="table-scroll" role="region" aria-label="종목별 1회 인정 기준" tabindex="0" data-slide="challenge-rules" data-slide-title="종목별 1회 인정 기준"><table class="landmark-table recipe-comparison"><caption>종목별 1회 인정 기준</caption><thead><tr><th scope="col">종목</th><th scope="col">준비 상태와 완료 조건</th></tr></thead><tbody><tr><th scope="row">스쿼트</th><td>무릎 각도 70° 초과~100° 이하가 관측되어 DOWN에 진입한 뒤, 160°를 넘어 펴질 때 +1</td></tr><tr><th scope="row">푸쉬업</th><td>팔꿈치 각도가 90° 미만으로 굽혀진 뒤, 160°를 넘어 펴질 때 +1</td></tr><tr><th scope="row">팔벌려뛰기</th><td>DOWN 뒤 두 손목이 코보다 위이고 발 간격이 어깨너비의 1.3배를 초과해 UP이 될 때 +1</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="challenge-fair" data-slide-title="기준과 촬영 조건을 맞추세요"><p>스쿼트는 정자세 구간이 화면에서 관측되어야 합니다. 팔벌려뛰기는 손·발 조건 중 하나만 벗어나도 DOWN으로 돌아가므로, 완전히 모인 자세까지 검사하는 것은 아닙니다. 시험 동작에서 중복 카운트가 보이면 촬영 위치와 기준을 먼저 점검하고 모두에게 같은 설정을 적용하세요.</p><ol class="math-steps"><li><strong>자리 배치</strong> — 푸쉬업은 측면 촬영 자리를, 팔벌려뛰기는 전신이 보이고 옆 사람과 부딪히지 않는 공간을 준비합니다.</li><li><strong>순환 진행</strong> — 종목별 조를 나누고 운동할 사람·조작할 사람·기록할 사람을 번갈아 맡습니다.</li><li><strong>같은 조건</strong> — 종목당 공식 시도 횟수를 미리 정하고, 쉬는 시간을 둡니다. 무리하지 않고 중단할 수 있게 합니다.</li></ol></div>
+<div class="table-scroll" role="region" aria-label="종이나 별도 문서에 옮겨 쓰는 기록표" tabindex="0" data-slide="challenge-record" data-slide-title="종이나 별도 문서에 옮겨 쓰는 기록표"><table class="landmark-table recipe-comparison"><caption>종이나 별도 문서에 옮겨 쓰는 기록표</caption><thead><tr><th scope="col">이름</th><th scope="col">스쿼트</th><th scope="col">푸쉬업</th><th scope="col">팔벌려뛰기</th><th scope="col">합계</th></tr></thead><tbody><tr><th scope="row">참가자 1</th><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><th scope="row">참가자 2</th><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><th scope="row">참가자 3</th><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="challenge-winner" data-slide-title="종합 우승자 발표"><h3>👑 오늘의 AI 운동왕을 발표합니다!</h3><p>종목별 공식 60초 기록을 더해 합계가 가장 높은 참가자를 종합 우승자로 정합니다. 동점이면 공동 우승 등 미리 합의한 규칙을 따릅니다. 동작별 속도와 난이도가 다르므로 이 합계는 수업용 점수이지 체력을 객관적으로 평가하는 지표는 아닙니다.</p><p>종목별 우승자도 함께 발표하고, 친구의 인식 문제를 해결하거나 판정 기준을 잘 설명한 과정도 나눠 보세요.</p></div>
+</div>
+      </section>
+
+      <section class="lecture-section" id="plank" aria-labelledby="plank-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">BONUS</p>
+          <h2 id="plank-title">플랭크 — 횟수가 아닌 시간 ⏱</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="plank-intro" data-slide-title="시간이 남으면 도전하는 보너스"><p>지금부터는 시간이 남을 때 진행하는 보너스 실습입니다. 앞에서 완성한 스쿼트·푸쉬업·팔벌려뛰기와 런지 확장 예시는 동작을 ‘세는’ 문제였습니다. 플랭크는 같은 자세를 ‘버티는’ 시간이 관심 대상입니다.</p><p>상태를 판단한 뒤 기록한다는 구조는 그대로지만, 상태가 바뀌는 순간 1을 더하는 대신 <strong>조건을 만족하는 동안 시간을 누적</strong>합니다. 원본은 UP/DOWN 문자열 대신 <code>is_plank</code>라는 참·거짓 값으로 현재 조건을 표현합니다.</p></div>
+<div class="table-scroll" role="region" aria-label="횟수에서 시간으로" tabindex="0" data-slide="plank-compare" data-slide-title="횟수에서 시간으로"><table class="landmark-table recipe-comparison"><caption>횟수에서 시간으로</caption><thead><tr><th scope="col">대상</th><th scope="col">기록할 것</th><th scope="col">처리</th></tr></thead><tbody><tr><th scope="row">스쿼트 / 푸쉬업 / 팔벌려뛰기</th><td>반복 횟수</td><td>상태 전환 때 count += 1</td></tr><tr><th scope="row">플랭크</th><td>조건을 만족한 누적 시간</td><td>held_time += dt</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="plank-angle" data-slide-title="어깨–엉덩이–발목으로 몸의 각도 재기"><p>오른쪽 어깨 12, 엉덩이 24, 발목 28로 엉덩이를 꼭짓점으로 하는 각도를 구합니다. 이 값이 <strong>160도를 넘으면</strong> 화면상 몸이 충분히 펴진 상태로 간주합니다. 측면에서 세 점이 잘 보이게 촬영하세요.</p><p>여기서도 같은 <code>calculate_angle</code>을 사용합니다. 다섯 번째 실습 파일에서의 재사용이며, 실제로 이 함수를 쓰는 Level 2 파일은 practice1·3·4·5 네 개입니다. 몸의 굽힘으로 각도가 작아지면 조건을 벗어나지만, 세 점의 2차원 각도만으로 올바른 자세 전체를 보장하지는 않습니다.</p></div>
+<pre data-code data-language="python" data-label="practice5_plank.py · 58–68줄" data-source="files/practice5_plank.py" data-source-lines="58-68" data-slide="plank-judge" data-slide-title="자세가 맞을 때만 누적"><code>    is_plank = False
+    if results.pose_landmarks:
+        lm = results.pose_landmarks.landmark
+        body_angle = calculate_angle([lm[12].x, lm[12].y],
+                                     [lm[24].x, lm[24].y],
+                                     [lm[28].x, lm[28].y])
+        is_plank = body_angle &gt; 160      # 몸이 충분히 일직선인가?
+
+        # ★ 카운트 대신 '시간 누적' ★
+        if is_plank:
+            held_time += dt</code></pre>
+<pre data-code data-language="python" data-label="practice5_plank.py · 54–56줄" data-source="files/practice5_plank.py" data-source-lines="54-56" data-slide="plank-dt" data-slide-title="이번 프레임에 걸린 시간"><code>    now = time.time()
+    dt = now - last_t        # 이번 프레임이 걸린 시간
+    last_t = now</code></pre>
+<div class="example-stack" data-slide="plank-time" data-slide-title="왜 프레임 수가 아니라 시간일까요?"><p><code>now</code>는 현재 시각, <code>last_t</code>는 직전 시각입니다. 둘의 차이 <code>dt</code>는 이번 반복 사이에 흐른 초입니다. 다음 계산을 위해 last_t를 now로 갱신합니다.</p><p>컴퓨터마다 처리 속도가 다르므로 30프레임이 언제나 1초인 것은 아닙니다. 실제 경과 시간이 0.03초이면 0.03을, 0.05초이면 0.05를 더해야 속도가 다른 컴퓨터에서도 시간을 기준으로 기록할 수 있습니다. 게임에서 움직임을 프레임 속도와 분리할 때도 쓰는 <strong>델타 타임</strong> 개념입니다.</p><p>현재 프레임에서 자세가 맞으면 직전 구간의 dt를 더하는 근사 방식입니다. 프레임이 오래 멈추면 측정 오차가 커질 수 있으므로 화면이 원활하게 갱신되는지도 확인하세요.</p></div>
+<div class="example-stack" data-slide="plank-pause" data-slide-title="자세가 무너지면 일시정지"><p>각도가 160도 이하가 되거나 관절이 인식되지 않으면 시간이 늘지 않습니다. 자세를 다시 맞추면 이전 기록에 이어 누적합니다. 따라서 화면의 값은 <strong>중단 없이 버틴 최장 시간</strong>이 아니라 조건을 만족한 시간의 합입니다.</p><p>중요한 것은 last_t를 자세와 무관하게 매 프레임 갱신한다는 점입니다. 그래야 쉬는 동안의 시간이 자세를 회복하는 순간 한꺼번에 더해지지 않습니다.</p></div>
+<div class="example-stack" data-slide="plank-run" data-slide-title="전체 코드 실행하기"><p><code>python practice5_plank.py</code>로 실행합니다. 영상 창에서 <kbd>r</kbd>을 누르면 누적 기록이 0으로 돌아가고, <kbd>q</kbd>로 종료합니다. 아래 블록은 원본 파일 전체를 기능 단위로 나눈 것입니다.</p><a class="button" href="files/practice5_plank.py" download>practice5_plank.py 전체 다운로드</a></div>
+<pre data-code data-language="python" data-label="practice5_plank.py · 1–22줄" data-source="files/practice5_plank.py" data-source-lines="1-22" data-file-part="practice5_plank.py" data-slide="plank-full-1" data-slide-title="파일 안내와 라이브러리"><code>"""
+========================================================================
+practice5_plank.py  -  (보너스) 플랭크 버티기 타이머
+========================================================================
+[새로운 개념: 횟수가 아니라 "시간"을 재는 상태머신]
+  스쿼트/푸쉬업/팔벌려뛰기 = 동작을 "셈" (반복 횟수)
+  플랭크                  = 자세를 "버팀" (지속 시간!)
+
+  -&gt; 같은 상태머신이지만, UP일 때 +1 하는 대신 '시간을 누적'한다.
+
+[플랭크 자세 판정]
+  몸이 일직선인가?  어깨(12)-엉덩이(24)-발목(28) 각도가 약 160~180도
+  (구부정하면 각도가 작아짐 -&gt; 타이머 일시정지!)
+
+실행:  python practice5_plank.py    (종료: q / 리셋: r)
+========================================================================
+"""
+import cv2
+import time
+import numpy as np
+import mediapipe as mp
+</code></pre>
+<pre data-code data-language="python" data-label="practice5_plank.py · 23–37줄" data-source="files/practice5_plank.py" data-source-lines="23-37" data-file-part="practice5_plank.py" data-slide="plank-full-23" data-slide-title="재사용한 각도 함수"><code>def calculate_angle(a, b, c):
+    """b를 꼭짓점으로 하는 a-b-c 각도(도)를 반환"""
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    # Level 1과 같은 벡터 내적 + arccos
+    ba = a - b
+    bc = c - b
+    dot_product = np.dot(ba, bc)
+    magnitude_ba = np.linalg.norm(ba)
+    magnitude_bc = np.linalg.norm(bc)
+    cosine_angle = dot_product / (magnitude_ba * magnitude_bc)
+    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
+    return np.degrees(np.arccos(cosine_angle))
+</code></pre>
+<pre data-code data-language="python" data-label="practice5_plank.py · 38–53줄" data-source="files/practice5_plank.py" data-source-lines="38-53" data-file-part="practice5_plank.py" data-slide="plank-full-38" data-slide-title="준비와 영상 처리"><code>mp_pose = mp.solutions.pose
+mp_draw = mp.solutions.drawing_utils
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+cap = cv2.VideoCapture(0)  # 기본 카메라. 안 잡히면 1로 변경
+
+held_time = 0.0          # 누적 버틴 시간(초)
+last_t = time.time()     # 직전 프레임 시각
+
+while True:
+    success, frame = cap.read()
+    if not success:
+        break
+    frame = cv2.flip(frame, 1)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(rgb)
+</code></pre>
+<pre data-code data-language="python" data-label="practice5_plank.py · 54–69줄" data-source="files/practice5_plank.py" data-source-lines="54-69" data-file-part="practice5_plank.py" data-slide="plank-full-54" data-slide-title="델타 타임과 자세 판정"><code>    now = time.time()
+    dt = now - last_t        # 이번 프레임이 걸린 시간
+    last_t = now
+
+    is_plank = False
+    if results.pose_landmarks:
+        lm = results.pose_landmarks.landmark
+        body_angle = calculate_angle([lm[12].x, lm[12].y],
+                                     [lm[24].x, lm[24].y],
+                                     [lm[28].x, lm[28].y])
+        is_plank = body_angle &gt; 160      # 몸이 충분히 일직선인가?
+
+        # ★ 카운트 대신 '시간 누적' ★
+        if is_plank:
+            held_time += dt
+</code></pre>
+<pre data-code data-language="python" data-label="practice5_plank.py · 70–84줄" data-source="files/practice5_plank.py" data-source-lines="70-84" data-file-part="practice5_plank.py" data-slide="plank-full-70" data-slide-title="시간과 자세 문구 표시"><code>        mp_draw.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        cv2.putText(frame, f"body: {int(body_angle)}deg", (15, 150),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
+    color = (0, 255, 0) if is_plank else (0, 0, 255)
+    status = "HOLDING!" if is_plank else "FIX POSTURE"
+
+    cv2.rectangle(frame, (0, 0), (360, 110), (0, 0, 0), -1)
+    cv2.putText(frame, "PLANK", (15, 35),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+    cv2.putText(frame, f"{held_time:5.1f} s", (15, 95),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.6, (255, 255, 255), 3)
+    cv2.putText(frame, status, (190, 60),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+</code></pre>
+<pre data-code data-language="python" data-label="practice5_plank.py · 85–93줄" data-source="files/practice5_plank.py" data-source-lines="85-93" data-file-part="practice5_plank.py" data-slide="plank-full-85" data-slide-title="초기화와 종료"><code>    cv2.imshow("AI Plank Timer", frame)
+    key = cv2.waitKey(1) &amp; 0xFF
+    if key == ord('q'):
+        break
+    if key == ord('r'):
+        held_time = 0.0
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+<div class="example-stack" data-slide="plank-challenge" data-slide-title="누가 더 오래 조건을 유지할까요?"><aside class="callout"><div><strong>보너스 도전</strong><p>r로 기록을 초기화하고, 같은 관찰 시간 안에서 조건을 만족한 누적 시간을 비교해 보세요. 화면의 HOLDING!과 FIX POSTURE가 어떻게 바뀌는지 기록자가 확인합니다. 단순히 버티고 있어도 각도 조건을 벗어나면 시간이 늘지 않습니다.</p></div></aside><p>무리하지 않는 범위에서 진행하고 불편하면 멈추세요. 이 프로그램은 수업용 측정 예제이며 자세의 안전성을 판정하는 도구는 아닙니다.</p></div>
+</div>
+      </section>
+
+      <section class="lecture-section" id="wrapup" aria-labelledby="wrapup-title" data-reveal>
+        <div class="section-heading">
+          <p class="kicker">WRAP UP</p>
+          <h2 id="wrapup-title">마무리와 다음 이야기</h2>
+        </div>
+<div class="example-stack">
+<div class="example-stack" data-slide="wrap-summary" data-slide-title="운동 하나에서 확장 가능한 코치로"><p>Level 1의 스쿼트 하나에서 출발해, Level 2의 실습 파일 다섯 개로 푸쉬업·팔벌려뛰기·종목 전환·도전 모드·플랭크까지 확장했습니다. 완성된 운동은 네 가지이고, 런지는 다섯 번째 운동으로 추가해 보는 교육용 예시입니다.</p><p>모든 것을 처음부터 만들지는 않았습니다. 각도 계산, 상태를 기억하는 방법, MediaPipe 준비 흐름을 재사용하고, 운동별 판정 함수와 연결 데이터, 경기 모드와 시간 기록을 더했습니다. 무엇을 그대로 둘지 알면 새 기능을 만들 때 집중할 부분이 줄어듭니다.</p></div>
+<div class="table-scroll" role="region" aria-label="재사용과 새 설계의 연결" tabindex="0" data-slide="wrap-reuse" data-slide-title="재사용과 새 설계의 연결"><table class="landmark-table recipe-comparison"><caption>재사용과 새 설계의 연결</caption><thead><tr><th scope="col">재사용한 것</th><th scope="col">새로 만들거나 바꾼 것</th></tr></thead><tbody><tr><th scope="row">벡터 내적＋arccos 각도 함수</th><td>운동에 맞는 관절 번호와 판정 기준</td></tr><tr><th scope="row">MediaPipe 준비와 랜드마크 읽기</th><td>손목 높이·발 간격의 위치 기반 측정</td></tr><tr><th scope="row">DOWN → UP 카운트 구조</th><td>판정 함수 분리와 EXERCISES 연결</td></tr><tr><th scope="row">상태에 따라 처리하는 설계</th><td>경기 mode와 60초 도전 UI</td></tr><tr><th scope="row">각도 측정과 조건 판단</th><td>플랭크의 델타 타임 누적</td></tr></tbody></table></div>
+<div class="example-stack" data-slide="wrap-concepts" data-slide-title="오늘 배운 세 가지"><div class="card-grid"><article class="card"><h3>재사용</h3><p>한 번 잘 만든 함수는 계속 씁니다. 푸쉬업과 플랭크에서 같은 각도 함수에 다른 관절을 넣었습니다.</p></article><article class="card"><h3>선택</h3><p>도구는 동작에 맞춰 고릅니다. 팔벌려뛰기에서는 각도 대신 위치와 거리를 선택했습니다.</p></article><article class="card"><h3>추상화</h3><p>같은 것과 다른 것을 나누고, 다른 것만 갈아 끼웁니다. 만능 코치가 판정 함수를 바꾸어 부르는 구조입니다.</p></article></div></div>
+<div class="example-stack" data-slide="wrap-next" data-slide-title="다음에는 내가 고른 운동으로"><p>런지, 사이드 레터럴 레이즈, 윗몸일으키기 중 하나를 고르거나 새 운동을 제안해 보세요. 먼저 <strong>어느 관절을 볼지, 각도·위치·거리 중 무엇을 잴지, 어떤 조건을 한 동작으로 인정할지</strong>를 종이에 적습니다.</p><ol class="math-steps"><li>랜드마크 지도에서 필요한 관절 번호를 고릅니다.</li><li>서로 다른 자세에서 측정값을 관찰하고 기준과 보류 구간을 정합니다.</li><li>lm을 받아 UP / DOWN / None을 반환하는 판정 함수를 만듭니다.</li><li>EXERCISES에 한 줄을 등록하고, 공통 카운트가 그대로 작동하는지 시험합니다.</li></ol><p>‘한 줄 추가’는 판정 함수가 준비된 뒤의 연결 작업입니다. 숫자를 먼저 정하기보다 실제 관찰값으로 규칙을 설계해 보세요.</p></div>
+<div class="example-stack" data-slide="wrap-world" data-slide-title="더 넓은 곳에 쓰이는 생각"><p>영상에서 특징을 찾고 숫자로 측정해 의미 있는 기록으로 바꾸는 생각은 홈트레이닝 앱, 재활 동작 기록, 스포츠 동작 분석으로 이어질 수 있습니다. 수어 인식에서도 몸과 손의 움직임을 읽는 관점은 연결됩니다.</p><p>다만 실제 서비스에는 더 많은 관절 정보, 시간에 따른 변화, 학습 모델과 검증이 필요합니다. 특히 재활 판단이나 수어의 의미를 오늘의 각도 규칙 몇 개만으로 처리할 수는 없습니다. 오늘은 그 출발점인 ‘무엇을 측정하고 어떻게 해석할지’를 직접 설계했습니다.</p></div>
+<div class="example-stack" data-slide="wrap-files" data-slide-title="실습 자료 다시 받기"><p>다섯 실습 파일과 환경 파일입니다. Level 1과 같은 가상환경을 사용하고, 필요한 파일을 같은 실습 폴더에 저장하세요.</p><div class="example-stack"><a class="button" href="files/practice1_pushup.py" download>practice1_pushup.py 다운로드</a><a class="button" href="files/practice2_jumpingjack.py" download>practice2_jumpingjack.py 다운로드</a><a class="button" href="files/practice3_multi_coach.py" download>practice3_multi_coach.py 다운로드</a><a class="button" href="files/practice4_workout_king.py" download>practice4_workout_king.py 다운로드</a><a class="button" href="files/practice5_plank.py" download>practice5_plank.py 다운로드</a><a class="button" href="files/requirements.txt" download>requirements.txt 다운로드</a></div></div>
+<div class="example-stack" data-slide="wrap-finish" data-slide-title="수학과 코드로 움직임을 읽다"><p><strong>우리는 수학과 코드로 몸의 움직임을 읽어냈습니다.</strong> Level 1에서 좌표 세 개를 각도로 바꾸고 한 번의 스쿼트를 세었다면, Level 2에서는 그 도구를 다시 쓰고, 측정 방법을 고르고, 서로 다른 운동이 하나의 구조로 동작하도록 설계했습니다.</p><p>새로운 동작을 만났을 때 “전부 다시 만들까?” 대신 “무엇이 같고 무엇이 다를까?”를 물어보세요. 오늘 만든 코드는 다음 아이디어의 출발점입니다.</p><div><a class="button" href="../level1/">Level 1 다시 보기</a> <a class="button" href="../">강의 목록으로</a></div></div>
+</div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-instructor">
+        <div data-instructor-avatar></div>
+        <div>
+          <strong data-instructor-name></strong>
+          <p data-instructor-affiliation></p>
+          <a class="footer-email" data-instructor-email></a>
+        </div>
+      </div>
+      <div data-other-lectures-region>
+        <h2 class="footer-heading">다른 강의 둘러보기</h2>
+        <div class="other-lectures" data-other-lectures></div>
+      </div>
+    </div>
+  </footer>
+  <!-- 강사 모달의 내용은 shared.js가 SITE.instructor로 한 번만 생성합니다. -->
+  <div class="sr-only" role="status" aria-live="polite" data-copy-status></div>
+  <noscript>강의 정보와 인터랙션을 표시하려면 브라우저에서 JavaScript를 켜 주세요.</noscript>
+</body>
+</html>

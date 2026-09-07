@@ -49,16 +49,16 @@ window.SITE = {
       slug: "level2",
       badge: "LEVEL 2",
       title: "AI 운동왕 시즌 2",
-      subtitle: "푸쉬업·팔벌려뛰기·플랭크까지 하나의 레시피로",
+      subtitle: "하나의 레시피로 푸쉬업·팔벌려뛰기·플랭크까지",
       kicker: "GENERALIZATION",
       duration: "2시간",
       target: "고등학교",
       difficulty: "심화",
-      tags: ["함수 재사용", "위치 기반 측정", "데이터로 설계"],
+      tags: ["함수 재사용", "위치 기반 측정", "데이터로 설계", "추상화"],
       accent: "violet",
       emoji: "",
       cover: "",
-      status: "coming"
+      status: "ready"
     }
   ],
 

@@ -1,0 +1,8 @@
+# AI 운동왕 시즌 2 - 실습 환경
+# Level 1과 동일한 환경
+opencv-python==4.10.0.84
+mediapipe==0.10.21
+numpy==1.26.4
+pillow==10.4.0
+
+# 권장: Python 3.11
