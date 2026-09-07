@@ -354,7 +354,7 @@
     // Equal nonempty data-slide values group existing elements without changing
     // reading layout. Empty values each start a slide. A template can reference
     // an existing pre by ID: data-slide-code + data-slide-lines (no duplicate code).
-    const slides = [];
+    const allSlides = [];
     sections.forEach(function (section, sectionIndex) {
       const groups = new Map();
       const markers = Array.from(section.querySelectorAll("[data-slide]"));
@@ -365,11 +365,14 @@
         if (!slide) {
           slide = { section, sectionIndex, title: marker.dataset.slideTitle || "", markers: [] };
           groups.set(key, slide);
-          slides.push(slide);
+          allSlides.push(slide);
         }
         slide.markers.push(marker);
+        if (marker.hasAttribute("data-slide-skip")) slide.skip = true;
       });
     });
+    let includeSkipped = false;
+    let slides = allSlides.filter(function (slide) { return !slide.skip; });
     const stage = element("div", "presentation-stage");
     stage.hidden = true;
     stage.tabIndex = -1;
@@ -389,7 +392,8 @@
     hud.setAttribute("role", "status");
     hud.setAttribute("aria-live", "polite");
     const counter = element("strong", "presentation-counter");
-    hud.append(counter, element("span", "", "← → 조각 · Shift + 방향키 섹션 · B 블랙아웃 · P / Esc 종료"));
+    const skipStatus = element("span", "presentation-skip-status");
+    hud.append(counter, skipStatus, element("span", "", "← → 조각 · Shift + 방향키 섹션 · B 블랙아웃 · P / Esc 종료"));
     const blackout = element("div", "presentation-blackout");
     blackout.hidden = true;
     blackout.setAttribute("aria-hidden", "true");
@@ -448,10 +452,10 @@
       for (const size of sizes) {
         stage.style.setProperty("--slide-body", size[0] + "px");
         stage.style.setProperty("--slide-code", size[1] + "px");
-        if (content.scrollHeight <= viewport.clientHeight + 1) break;
+        if (content.scrollHeight <= viewport.clientHeight) break;
       }
       const excess = content.scrollHeight - viewport.clientHeight;
-      if (excess > 1) {
+      if (excess > 0) {
         const item = { slide: index + 1, section: slides[index].section.id, title: title.textContent, overflowPx: excess };
         overflow.set(index, item);
         overflowHint.hidden = false;
@@ -465,16 +469,30 @@
     }
     function show(nextIndex, silent) {
       restore();
+      skipStatus.textContent = "S · 건너뛴 조각 " + (includeSkipped ? "포함" : "제외");
+      stage.dataset.includeSkipped = String(includeSkipped);
+      if (!slides.length) {
+        index = 0;
+        stage.dataset.slideIndex = "0";
+        stage.dataset.section = "";
+        title.textContent = "표시할 조각이 없습니다. S를 눌러 전체 조각을 확인하세요.";
+        counter.textContent = "0 / 0 · 섹션 0/" + sections.length;
+        overflowHint.hidden = true;
+        stage.focus({ preventScroll: true });
+        return;
+      }
       index = Math.max(0, Math.min(slides.length - 1, nextIndex));
       const slide = slides[index];
       const sectionTitle = slide.section.querySelector("h2").textContent.trim();
       title.textContent = sectionTitle + (slide.title && slide.title !== sectionTitle ? " · " + slide.title : "");
       slide.markers.forEach(function (marker) {
-        const source = marker.dataset.slideCode ? document.getElementById(marker.dataset.slideCode) : marker;
+        // Optional teaching outline; S restores the unchanged original range.
+        const preview = !includeSkipped && marker.dataset.slidePreview;
+        const source = preview ? document.getElementById(preview) : marker.dataset.slideCode ? document.getElementById(marker.dataset.slideCode) : marker;
         if (!source) return;
         const node = source.matches("pre[data-code]") ? source.closest(".code-block") : source;
         move(node);
-        if (source.matches("pre[data-code]")) sliceCode(source, marker.dataset.slideLines);
+        if (source.matches("pre[data-code]")) sliceCode(source, preview ? source.dataset.slideLines : marker.dataset.slideLines);
         else source.querySelectorAll("pre[data-slide-lines]").forEach(function (pre) { sliceCode(pre, pre.dataset.slideLines); });
       });
       content.querySelectorAll("pre[data-code]").forEach(function (pre) {
@@ -494,6 +512,10 @@
     }
     function enter() {
       if (dialogOpen()) return;
+      includeSkipped = false;
+      slides = allSlides.filter(function (slide) { return !slide.skip; });
+      overflow.clear();
+      warned.clear();
       returnFocus = document.activeElement;
       const current = document.querySelector('[data-section-nav] a[aria-current="location"]');
       const start = current ? slides.findIndex(function (slide) { return slide.section.id === current.dataset.sectionId; }) : 0;
@@ -505,7 +527,7 @@
       show(start >= 0 ? start : 0);
     }
     function exit() {
-      const section = slides[index].section;
+      const section = slides[index] ? slides[index].section : sections[0];
       restore();
       stage.hidden = hud.hidden = blackout.hidden = true;
       document.body.classList.remove("is-presenting", "is-blackout");
@@ -550,11 +572,25 @@
       const forwards = ["ArrowRight", "ArrowDown", "PageDown"].includes(event.key);
       if ((backwards || forwards) && target instanceof Element && target.closest("[data-widget]")) return;
       if (event.key === "Escape") { event.preventDefault(); exit(); }
-      else if (backwards || forwards) {
+      else if (event.key.toLowerCase() === "s") {
         event.preventDefault();
+        const current = slides[index];
+        const originalIndex = allSlides.indexOf(current);
+        includeSkipped = !includeSkipped;
+        slides = allSlides.filter(function (slide) { return includeSkipped || !slide.skip; });
+        let next = slides.indexOf(current);
+        if (next < 0) next = slides.findIndex(function (slide) { return allSlides.indexOf(slide) > originalIndex; });
+        overflow.clear();
+        warned.clear();
+        show(next >= 0 ? next : slides.length - 1);
+      } else if (backwards || forwards) {
+        event.preventDefault();
+        if (!slides.length) return;
         const direction = backwards ? -1 : 1;
         if (event.shiftKey && event.key.startsWith("Arrow")) {
-          const targetSection = Math.max(0, Math.min(sections.length - 1, slides[index].sectionIndex + direction));
+          const visibleSections = Array.from(new Set(slides.map(function (slide) { return slide.sectionIndex; })));
+          const currentSection = visibleSections.indexOf(slides[index].sectionIndex);
+          const targetSection = visibleSections[Math.max(0, Math.min(visibleSections.length - 1, currentSection + direction))];
           show(slides.findIndex(function (slide) { return slide.sectionIndex === targetSection; }));
         } else show(index + direction);
       } else if (event.key.toLowerCase() === "b") {
