@@ -4,6 +4,75 @@
  * Phase 1-B-1: 도입부와 환경 설정.
  */
 .concept-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Level 1 widgets: all colors come from the shared theme tokens. */
+.interactive-widget { padding: var(--space-6); border: 1px solid var(--control-border); border-radius: var(--radius-lg); background: var(--surface-2); color: var(--text); display: grid; gap: var(--space-5); min-width: 0; }
+.interactive-widget h4, .interactive-widget h5 { margin: 0; font-size: var(--font-card); }
+.interactive-widget p { margin: 0; }
+.interactive-widget > *, .angle-layout > *, .calculation-columns > * { min-width: 0; }
+.interactive-widget svg { width: 100%; height: auto; }
+.interactive-widget svg text { fill: var(--text); font-family: var(--font-sans); }
+.widget-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.widget-slider { display: grid; gap: var(--space-3); font-weight: var(--weight-heading); }
+.widget-slider input { display: block; width: 100%; min-width: 0; height: 44px; margin: 0; accent-color: var(--accent-text); touch-action: pan-y; }
+.widget-toggle { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; }
+.widget-toggle input { width: 24px; height: 24px; accent-color: var(--accent-text); }
+.interactive-widget :focus-visible { outline: 3px solid var(--accent-text); outline-offset: 4px; }
+.widget-note { color: var(--text-muted); font-size: var(--font-small); }
+.widget-readout, .widget-result, .widget-equality { font-weight: var(--weight-heading); }
+.widget-code { display: block; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
+.landmark-drawing { max-width: 540px; margin-inline: auto; }
+.body-shape { fill: var(--surface); stroke: var(--control-border); stroke-width: 3; }
+.landmark-legend { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.landmark-group-0 { --group-color: var(--warn); color: var(--warn); }
+.landmark-group-1 { --group-color: var(--accent-text); color: var(--accent-text); }
+.landmark-group-2 { --group-color: var(--text-muted); color: var(--text-muted); }
+.landmark-point { cursor: pointer; }
+.point-target { fill: var(--bg); fill-opacity: 0; stroke: none; }
+.point-dot { fill: var(--bg); stroke: var(--group-color); stroke-width: 2; }
+.landmark-point text { font-size: 15px; font-weight: var(--weight-heading); pointer-events: none; }
+.landmark-point.is-today .point-dot { stroke-width: 6; }
+.landmark-point[aria-pressed="true"] .point-dot { fill: var(--accent-soft); stroke: var(--accent-text); }
+.landmark-point[aria-pressed="true"] text { fill: var(--accent-ink); }
+.today-only .landmark-point:not(.is-today) { opacity: .25; }
+.today-only .landmark-point:focus, .today-only .landmark-point:hover { opacity: 1; }
+.angle-layout { display: grid; grid-template-columns: minmax(200px, .7fr) minmax(0, 1.5fr); gap: var(--space-5); align-items: start; }
+.angle-drawing { max-width: 360px; margin-inline: auto; background: var(--surface); border-radius: var(--radius-lg); }
+.angle-drawing text { font-size: 20px; font-weight: var(--weight-heading); }
+.interactive-widget[data-judge] { --joint-color: var(--text-muted); --joint-fill: var(--surface); }
+.interactive-widget[data-judge="more"] { --joint-color: var(--warn); --joint-fill: var(--syntax-number); }
+.interactive-widget[data-judge="good"] { --joint-color: var(--accent-text); --joint-fill: var(--accent-soft); }
+.interactive-widget[data-judge="deep"] { --joint-color: var(--warn); --joint-fill: var(--warn); }
+.angle-leg { stroke: var(--joint-color); stroke-width: 9; stroke-linecap: round; }
+.angle-arc { stroke: var(--text-muted); stroke-width: 2; stroke-dasharray: 4 3; }
+.joint { fill: var(--joint-fill); stroke: var(--joint-color); stroke-width: 3; }
+.widget-calculations { display: grid; gap: var(--space-4); }
+.calculation-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.calculation-method { padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.calculation-method h5 { font-size: var(--font-small); }
+.widget-math { white-space: pre-wrap; overflow-wrap: anywhere; margin: var(--space-3) 0 0; font-family: var(--font-mono); }
+.widget-equality { color: var(--accent-text); }
+.widget-judgment { border-left: 6px solid var(--joint-color); padding-left: var(--space-3); }
+.counter-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-4); }
+.counter-card { padding: var(--space-4); border: 1px solid var(--control-border); border-radius: var(--radius-md); background: var(--surface); min-width: 0; }
+.counter-value { display: block; font-size: 3rem; color: var(--accent-text); }
+.state-drawing { max-width: 560px; margin-inline: auto; }
+.state-node circle { fill: var(--bg); stroke: var(--control-border); stroke-width: 3; }
+.state-node text { font-size: 26px; font-weight: var(--weight-heading); }
+.state-node.is-current circle { fill: var(--accent-soft); stroke: var(--accent-text); stroke-width: 6; }
+.state-node.is-current text { fill: var(--accent-ink); }
+.state-arrow { fill: none; stroke: var(--control-border); stroke-width: 3; }
+.state-arrow.is-transition { stroke: var(--accent-text); stroke-width: 7; }
+.transition-label { font-size: 18px; }
+.state-node circle { transition: stroke-width var(--duration-fast); }
+.widget-transition { min-height: 1.5em; color: var(--accent-text); }
+@media (max-width: 767px) {
+  .interactive-widget { padding: var(--space-4); }
+  .angle-layout, .calculation-columns { grid-template-columns: 1fr; }
+  .counter-card { padding: var(--space-3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .interactive-widget *, .interactive-widget *::before, .interactive-widget *::after { animation: none !important; transition: none !important; }
+}
 .process-flow { list-style: none; margin: 0; padding: 0; }
 .process-flow .kicker { margin: 0 0 var(--space-3); color: var(--accent-text); }
 .mission-finish { font-size: var(--font-card); }
