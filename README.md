@@ -19,7 +19,7 @@ assets/css/base.css        # 공통 UI와 학습 경로 카드
 assets/css/lecture.css     # 강의 전용 스타일
 assets/js/shared.js        # 메타·카드·모달·테마·발표·진행 체크
 assets/js/widgets.js       # 강의별 위젯 등록
-assets/img/instructor.webp # 공유 강사 사진
+assets/img/instructor.webp # 공유 선생님 사진
 assets/img/level1/          # Level 1 이미지
 docs/                      # 이미지 목록과 복원 코드
 DESIGN.md                  # 공통 디자인 기준
@@ -64,7 +64,7 @@ http://localhost:8000/mediapipe/ 에서 허브를 엽니다.
 instructor는 모든 레벨과 허브에서 공유하며 photo 이외 기존 소개 정보를 유지합니다.
 
 강의 페이지에서 P는 발표 모드 진입·종료, ←/→는 조각 이동, Shift+방향키는 섹션 이동, S는 건너뛴 조각 포함/제외, B는 블랙아웃,
-Esc는 발표 종료입니다. 강사 모달이나 입력 중에는 발표 단축키가 동작하지 않습니다.
+Esc는 발표 종료입니다. 선생님 소개 모달이 열려 있거나 입력 중에는 발표 단축키가 동작하지 않습니다.
 섹션 열람 체크는 `lecture-progress:{slug}`로 저장됩니다.
 허브에서는 발표 모드와 섹션 진행 체크를 초기화하지 않습니다.
 테마는 공통 저장 키 lecture-template-theme을 사용합니다.
@@ -89,7 +89,7 @@ instructor 변경은 템플릿과 비교하여 수동 병합합니다.
 
 ## 이미지와 자료 규칙
 
-- 강사 사진은 assets/img/instructor.webp, 레벨 이미지는 assets/img/{slug}/에 보관합니다.
+- 선생님 사진은 assets/img/instructor.webp, 레벨 이미지는 assets/img/{slug}/에 보관합니다.
 - 모든 img에 의미 있는 alt, loading="lazy", width/height를 지정합니다.
 - docs/IMAGE-MANIFEST.md: 이미지의 원본 슬라이드, 크기, 대체 텍스트와 중복 처리 지침입니다.
   실제 Level 1 파일 위치는 assets/img/level1/입니다.

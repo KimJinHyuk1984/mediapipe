@@ -116,7 +116,7 @@
   }
 
   function makeAvatar(instructor, large = false) {
-    const name = instructor.name || "강사";
+    const name = instructor.name || "선생님";
     const initials = /[가-힣]/.test(name) ? name.trim().slice(0, 1)
       : name.trim().split(/\s+/).map(function (part) { return part[0]; }).slice(0, 2).join("").toUpperCase();
     const avatar = element("div", "avatar" + (large ? " avatar-large" : ""), initials);
@@ -126,7 +126,7 @@
       const photoPath = String(instructor.photo);
       if (!/^(?:[a-z]+:|\/|\\)/i.test(photoPath) && !photoPath.split(/[\/\\]/).includes("..")) {
         const image = element("img");
-        image.alt = name + " 강사 사진";
+        image.alt = (instructor.name ? name + " 선생님" : name) + " 사진";
         image.loading = "lazy";
         image.width = large ? 80 : 56;
         image.height = large ? 80 : 56;
@@ -165,13 +165,13 @@
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute("aria-labelledby", "instructor-dialog-title");
     const top = element("div", "dialog-top");
-    const title = element("h2", "", "강사 소개");
+    const title = element("h2", "", "선생님 소개");
     title.id = "instructor-dialog-title";
     const close = element("button", "button button-icon", "×");
     close.type = "button";
-    close.setAttribute("aria-label", "강사 소개 닫기");
+    close.setAttribute("aria-label", "선생님 소개 닫기");
     top.append(title, close);
-    const name = element("h3", "instructor-name", instructor.name || "강사");
+    const name = element("h3", "instructor-name", instructor.name || "선생님");
     const affiliation = element("p", "instructor-affiliation", instructor.affiliation || "");
     const email = element("a", "instructor-email");
     emailLink(email, instructor.email);
@@ -383,9 +383,11 @@
     viewport.tabIndex = 0;
     viewport.setAttribute("aria-label", "발표 조각 내용");
     const content = element("div", "presentation-content");
+    const fitFrame = element("div", "presentation-fit-frame");
     const overflowHint = element("p", "presentation-overflow-hint", "↓ 내용이 더 있습니다. 이 영역에서 스크롤하세요.");
     overflowHint.hidden = true;
-    viewport.append(content);
+    fitFrame.append(content);
+    viewport.append(fitFrame);
     stage.append(title, viewport, overflowHint);
     const hud = element("div", "presentation-hud");
     hud.hidden = true;
@@ -405,6 +407,7 @@
     let fitting = false;
     let auditing = false;
     let transition = null;
+    const imageStyles = new Map();
     const overflow = new Map();
     const warned = new Set();
     const presenting = function () { return !stage.hidden; };
@@ -412,6 +415,11 @@
       return Array.from(document.querySelectorAll("dialog")).some(function (dialog) { return dialog.open; });
     }
     function restore() {
+      imageStyles.forEach(function (style, img) {
+        if (style === null) img.removeAttribute("style");
+        else img.setAttribute("style", style);
+      });
+      imageStyles.clear();
       if (transition) { transition.cancel(); transition = null; }
       annotations.forEach(function (note) { note.remove(); });
       annotations = [];
@@ -448,15 +456,47 @@
       fitting = true;
       overflowHint.hidden = true;
       viewport.classList.remove("has-overflow");
-      const sizes = [[28, 24], [27, 23], [26, 22], [25, 21], [24, 20], [23, 19], [22, 18], [21, 17], [20, 16], [19, 15], [18, 15], [17, 15]];
+      fitFrame.classList.remove("is-scaled");
+      fitFrame.style.height = "";
+      content.style.transform = "";
+      const slide = slides[index];
+      const widget = content.querySelector("[data-widget]");
+      const images = Array.from(content.querySelectorAll("figure img"));
+      const contain = !!widget || images.length > 0 || (slide && slide.markers.some(function (marker) { return marker.dataset.slideFit === "contain"; }));
+      stage.dataset.fitType = contain ? "contain" : "text";
+      stage.dataset.fitScale = "1";
+      const sizes = contain ? [[28, 24]] : [[28, 24], [27, 23], [26, 22], [25, 21], [24, 20]];
       for (const size of sizes) {
         stage.style.setProperty("--slide-body", size[0] + "px");
         stage.style.setProperty("--slide-code", size[1] + "px");
-        if (content.scrollHeight <= viewport.clientHeight) break;
+        if (viewport.scrollHeight <= viewport.clientHeight && content.scrollHeight <= viewport.clientHeight - 2) break;
       }
-      const excess = content.scrollHeight - viewport.clientHeight;
+      if (contain && images.length && !widget) {
+        images.forEach(function (img) {
+          if (!imageStyles.has(img)) imageStyles.set(img, img.getAttribute("style"));
+          img.style.height = "auto";
+          img.style.maxHeight = "none";
+        });
+        const imageHeight = images.reduce(function (sum, img) { return sum + img.getBoundingClientRect().height; }, 0);
+        const otherHeight = content.scrollHeight - imageHeight;
+        const available = Math.max(1, (viewport.clientHeight - otherHeight - 2) / images.length);
+        images.forEach(function (img) { img.style.maxHeight = available + "px"; });
+      } else if (contain) {
+        // A transform alone leaves the unscaled layout box in the scroll area.
+        // The frame takes the rendered height; top origin prevents upper clipping.
+        const naturalHeight = content.scrollHeight;
+        const scale = Math.max(0.6, Math.min(1, (viewport.clientHeight - 2) / Math.max(1, naturalHeight), viewport.clientWidth / Math.max(1, content.scrollWidth)));
+        if (scale < 1) {
+          fitFrame.classList.add("is-scaled");
+          fitFrame.style.height = Math.ceil(naturalHeight * scale) + "px";
+          content.style.transform = "scale(" + scale + ")";
+        }
+        stage.dataset.fitScale = scale.toFixed(4);
+      }
+      // Measure the actual scroll container, not the document or only its child.
+      const excess = viewport.scrollHeight - viewport.clientHeight;
       if (excess > 0) {
-        const item = { slide: index + 1, section: slides[index].section.id, title: title.textContent, overflowPx: excess };
+        const item = { slide: index + 1, section: slide ? slide.section.id : "", title: title.textContent, scrollHeight: viewport.scrollHeight, clientHeight: viewport.clientHeight, overflowPx: excess, type: stage.dataset.fitType, scale: stage.dataset.fitScale };
         overflow.set(index, item);
         overflowHint.hidden = false;
         viewport.classList.add("has-overflow");
