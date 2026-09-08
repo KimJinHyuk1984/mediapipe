@@ -260,6 +260,94 @@
       nav.append(link);
     });
     const links = Array.from(nav.querySelectorAll('a[href^="#"]'));
+    const menu = element("div", "section-menu");
+    const controls = element("div", "section-menu-controls");
+    const toggle = element("button", "button section-menu-toggle");
+    const icon = element("span", "hamburger-icon");
+    const progress = element("span", "section-progress", "0 / " + sections.length);
+    toggle.type = "button";
+    toggle.id = "section-menu-toggle";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-controls", "section-menu-list");
+    toggle.setAttribute("aria-label", "섹션 목록 열기");
+    icon.setAttribute("aria-hidden", "true");
+    icon.append(element("span"), element("span"), element("span"));
+    toggle.append(icon, element("span", "section-menu-label", "목차"));
+    progress.dataset.sectionProgress = "";
+    progress.setAttribute("aria-live", "polite");
+    progress.setAttribute("aria-label", "열람한 섹션 0개, 전체 " + sections.length + "개");
+    controls.append(toggle, progress);
+    nav.id = "section-menu-list";
+    nav.hidden = true;
+    nav.setAttribute("aria-labelledby", toggle.id);
+    nav.before(menu);
+    menu.append(controls, nav);
+
+    function isOpen() {
+      return toggle.getAttribute("aria-expanded") === "true";
+    }
+    function openMenu(focusIndex) {
+      if (!links.length) return;
+      nav.hidden = false;
+      menu.classList.add("is-open");
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute("aria-label", "섹션 목록 닫기");
+      if (typeof focusIndex === "number") links[focusIndex].focus();
+    }
+    function closeMenu(restoreFocus) {
+      if (!isOpen()) return;
+      nav.hidden = true;
+      menu.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "섹션 목록 열기");
+      if (restoreFocus) toggle.focus({ preventScroll: true });
+    }
+    toggle.addEventListener("click", function () {
+      if (isOpen()) closeMenu(true);
+      else openMenu();
+    });
+    toggle.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        openMenu(event.key === "ArrowDown" ? 0 : links.length - 1);
+      }
+    });
+    nav.addEventListener("keydown", function (event) {
+      if (!isOpen()) return;
+      const current = links.indexOf(document.activeElement);
+      let next = current;
+      if (event.key === "ArrowDown") next = current < 0 ? 0 : (current + 1) % links.length;
+      else if (event.key === "ArrowUp") next = current < 0 ? links.length - 1 : (current - 1 + links.length) % links.length;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = links.length - 1;
+      else if (event.key === "Escape") {
+        event.preventDefault();
+        closeMenu(true);
+        return;
+      } else return;
+      event.preventDefault();
+      links[next].focus();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && isOpen()) {
+        event.preventDefault();
+        closeMenu(true);
+      }
+    });
+    document.addEventListener("pointerdown", function (event) {
+      if (isOpen() && !menu.contains(event.target)) {
+        closeMenu(true);
+        // Native pointer focus runs after pointerdown. Restore blank-area clicks
+        // without stealing focus from another button, link, or input.
+        requestAnimationFrame(function () {
+          if (document.activeElement === document.body || document.activeElement === document.getElementById("main") || nav.contains(document.activeElement)) {
+            toggle.focus({ preventScroll: true });
+          }
+        });
+      }
+    });
+    document.addEventListener("lecture:presentation-enter", function () { closeMenu(true); });
+
     const hero = document.getElementById("top");
     let activeId = "";
     function activate(id) {
@@ -268,15 +356,18 @@
       links.forEach(function (link) {
         if (link.hash === "#" + id) {
           link.setAttribute("aria-current", "location");
-          if (nav.scrollWidth > nav.clientWidth) {
-            const a = link.getBoundingClientRect();
-            const b = nav.getBoundingClientRect();
-            if (a.left < b.left || a.right > b.right) nav.scrollLeft += a.left - b.left - 4;
-          }
         } else link.removeAttribute("aria-current");
       });
     }
-    links.forEach(function (link) { link.addEventListener("click", function () { activate(link.hash.slice(1)); }); });
+    links.forEach(function (link) {
+      link.addEventListener("click", function () {
+        activate(link.hash.slice(1));
+        closeMenu(false);
+        requestAnimationFrame(function () {
+          if (nav.hidden) toggle.focus({ preventScroll: true });
+        });
+      });
+    });
     let observer;
     let headerHeight = 0;
     function measure() {
@@ -325,6 +416,11 @@
           link.prepend(check);
         } else if (!done && old) old.remove();
       });
+      const progress = document.querySelector("[data-section-progress]");
+      if (progress) {
+        progress.textContent = visited.length + " / " + sections.length;
+        progress.setAttribute("aria-label", "열람한 섹션 " + visited.length + "개, 전체 " + sections.length + "개");
+      }
     }
 
     function mark(section) {
@@ -556,6 +652,7 @@
       slides = allSlides.filter(function (slide) { return !slide.skip; });
       overflow.clear();
       warned.clear();
+      document.dispatchEvent(new CustomEvent("lecture:presentation-enter"));
       returnFocus = document.activeElement;
       const current = document.querySelector('[data-section-nav] a[aria-current="location"]');
       const start = current ? slides.findIndex(function (slide) { return slide.section.id === current.dataset.sectionId; }) : 0;
